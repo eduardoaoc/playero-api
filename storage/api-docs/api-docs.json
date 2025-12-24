@@ -1,0 +1,2364 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Playero API",
+        "description": "API oficial do sistema Playero",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "http://127.0.0.1:8000",
+            "description": "Servidor Local"
+        }
+    ],
+    "paths": {
+        "/api/v1/admin/admins": {
+            "get": {
+                "tags": [
+                    "Administradores"
+                ],
+                "summary": "Listar administradores",
+                "operationId": "9e7c3acc4d7d65a6db47933a95d1ad2c",
+                "responses": {
+                    "200": {
+                        "description": "Lista de administradores"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Administradores"
+                ],
+                "summary": "Criar administrador",
+                "operationId": "a718844c6b4f4abc8ac392e96cfd1f38",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Admin"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@playero.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Administrador criado"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/admins/{id}": {
+            "put": {
+                "tags": [
+                    "Administradores"
+                ],
+                "summary": "Editar administrador",
+                "operationId": "ce4d247a97537c696a8dbca5601caa19",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Admin"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@playero.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Administrador atualizado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Administradores"
+                ],
+                "summary": "Excluir administrador",
+                "operationId": "3e6cca553a5061372d079ed2801eed7e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Administrador removido"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Administrador nao encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/admins/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Administradores"
+                ],
+                "summary": "Ativar ou desativar administrador",
+                "operationId": "87e28fc5ab87c6bea43d03629db52358",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status atualizado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/dashboard": {
+            "get": {
+                "tags": [
+                    "Dashboard"
+                ],
+                "summary": "Metricas do dashboard",
+                "operationId": "4d1ed083cd153b05cc9ca6a09e3f746f",
+                "responses": {
+                    "200": {
+                        "description": "Metricas carregadas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dashboard carregado com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "reservas_total": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                },
+                                                "reservas_pendentes": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "reservas_confirmadas": {
+                                                    "type": "integer",
+                                                    "example": 90
+                                                },
+                                                "quadras_ativas": {
+                                                    "type": "integer",
+                                                    "example": 8
+                                                },
+                                                "usuarios_ativos": {
+                                                    "type": "integer",
+                                                    "example": 350
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/home": {
+            "put": {
+                "tags": [
+                    "CMS Home"
+                ],
+                "summary": "Atualizar conteudo da Home",
+                "operationId": "eeef7d9bd0465a295cf2c2a52b67a5c3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "sections"
+                                ],
+                                "properties": {
+                                    "sections": {
+                                        "type": "string",
+                                        "example": "[{section:banner_principal,order:1,active:true,fields:[{key:titulo,type:text,value:Bem-vindo},{key:imagem,type:image,file:banner_image}]}]"
+                                    },
+                                    "banner_image": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "sections"
+                                ],
+                                "properties": {
+                                    "sections": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Conteudo atualizado"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/agenda/config": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Obter configuracao da agenda",
+                "operationId": "ac33d380c93f8d1dda870cb0b6079f0c",
+                "responses": {
+                    "200": {
+                        "description": "Configuracao atual",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Configuracao da agenda carregada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "hora_abertura": {
+                                                    "type": "string",
+                                                    "example": "08:00"
+                                                },
+                                                "hora_fechamento": {
+                                                    "type": "string",
+                                                    "example": "22:00"
+                                                },
+                                                "duracao_reserva_minutos": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "dias_semana_ativos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "example": "America/Sao_Paulo"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Configuracao nao encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Criar ou atualizar configuracao da agenda",
+                "operationId": "2e6537ab7174903aebaaf1f0be61bbe2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "hora_abertura",
+                                    "hora_fechamento",
+                                    "duracao_reserva_minutos",
+                                    "dias_semana_ativos"
+                                ],
+                                "properties": {
+                                    "hora_abertura": {
+                                        "type": "string",
+                                        "example": "08:00"
+                                    },
+                                    "hora_fechamento": {
+                                        "type": "string",
+                                        "example": "22:00"
+                                    },
+                                    "duracao_reserva_minutos": {
+                                        "type": "integer",
+                                        "example": 60
+                                    },
+                                    "dias_semana_ativos": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer",
+                                            "example": 1
+                                        }
+                                    },
+                                    "timezone": {
+                                        "type": "string",
+                                        "example": "America/Sao_Paulo"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Configuracao atualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Configuracao da agenda atualizada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "hora_abertura": {
+                                                    "type": "string",
+                                                    "example": "08:00"
+                                                },
+                                                "hora_fechamento": {
+                                                    "type": "string",
+                                                    "example": "22:00"
+                                                },
+                                                "duracao_reserva_minutos": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "dias_semana_ativos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "example": "America/Sao_Paulo"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "201": {
+                        "description": "Configuracao criada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Configuracao da agenda criada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "hora_abertura": {
+                                                    "type": "string",
+                                                    "example": "08:00"
+                                                },
+                                                "hora_fechamento": {
+                                                    "type": "string",
+                                                    "example": "22:00"
+                                                },
+                                                "duracao_reserva_minutos": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "dias_semana_ativos": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "example": "America/Sao_Paulo"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/agenda/blockings": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Listar bloqueios",
+                "operationId": "488d31151a2e1c819c4ab8eb082e069e",
+                "responses": {
+                    "200": {
+                        "description": "Lista de bloqueios",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bloqueios listados com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "quadra_id": {
+                                                        "type": "integer",
+                                                        "example": 1,
+                                                        "nullable": true
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-24"
+                                                    },
+                                                    "hora_inicio": {
+                                                        "type": "string",
+                                                        "example": "10:00",
+                                                        "nullable": true
+                                                    },
+                                                    "hora_fim": {
+                                                        "type": "string",
+                                                        "example": "12:00",
+                                                        "nullable": true
+                                                    },
+                                                    "motivo": {
+                                                        "type": "string",
+                                                        "example": "Manutencao",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Criar bloqueio manual",
+                "operationId": "66aff4505979e30ba60338bf8576fe74",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "data"
+                                ],
+                                "properties": {
+                                    "quadra_id": {
+                                        "type": "integer",
+                                        "example": 1,
+                                        "nullable": true
+                                    },
+                                    "data": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-24"
+                                    },
+                                    "hora_inicio": {
+                                        "type": "string",
+                                        "example": "10:00",
+                                        "nullable": true
+                                    },
+                                    "hora_fim": {
+                                        "type": "string",
+                                        "example": "12:00",
+                                        "nullable": true
+                                    },
+                                    "motivo": {
+                                        "type": "string",
+                                        "example": "Manutencao",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Bloqueio criado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bloqueio criado com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "quadra_id": {
+                                                    "type": "integer",
+                                                    "example": 1,
+                                                    "nullable": true
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_inicio": {
+                                                    "type": "string",
+                                                    "example": "10:00",
+                                                    "nullable": true
+                                                },
+                                                "hora_fim": {
+                                                    "type": "string",
+                                                    "example": "12:00",
+                                                    "nullable": true
+                                                },
+                                                "motivo": {
+                                                    "type": "string",
+                                                    "example": "Manutencao",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/agenda/blockings/{id}": {
+            "delete": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Excluir bloqueio",
+                "operationId": "99493aab3e2a7ceb9eb3c1c90542e861",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Bloqueio removido",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Bloqueio removido com sucesso."
+                                        },
+                                        "data": {
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Bloqueio nao encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login",
+                "description": "Autentica e retorna um token de acesso",
+                "operationId": "a7997e7c1e3bfed64d4e56de82415931",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@playero.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Login realizado"
+                    },
+                    "401": {
+                        "description": "Credenciais invalidas"
+                    },
+                    "403": {
+                        "description": "Usuario inativo"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Logout",
+                "operationId": "f6b8957b4c0b25636613a9f0512a8ba9",
+                "responses": {
+                    "200": {
+                        "description": "Logout realizado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Usuario autenticado",
+                "operationId": "37d33f0281f67d31d05b4c45eea0143b",
+                "responses": {
+                    "200": {
+                        "description": "Usuario autenticado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/refresh": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Renovar token",
+                "operationId": "c42c3cd7fd7fe0dbd5bcc42962059e90",
+                "responses": {
+                    "200": {
+                        "description": "Token renovado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/home": {
+            "get": {
+                "tags": [
+                    "CMS Home"
+                ],
+                "summary": "Conteudo da Home",
+                "operationId": "feb8cb99b041c59b503fbaa632fbbc79",
+                "responses": {
+                    "200": {
+                        "description": "Conteudo carregado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Home carregada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "sections": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "section": {
+                                                                "type": "string",
+                                                                "example": "banner_principal"
+                                                            },
+                                                            "order": {
+                                                                "type": "integer",
+                                                                "example": 1
+                                                            },
+                                                            "active": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "fields": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 10
+                                                                        },
+                                                                        "key": {
+                                                                            "type": "string",
+                                                                            "example": "titulo"
+                                                                        },
+                                                                        "type": {
+                                                                            "type": "string",
+                                                                            "example": "text"
+                                                                        },
+                                                                        "value": {
+                                                                            "type": "string",
+                                                                            "example": "Bem-vindo"
+                                                                        },
+                                                                        "order": {
+                                                                            "type": "integer",
+                                                                            "example": 1
+                                                                        },
+                                                                        "active": {
+                                                                            "type": "boolean",
+                                                                            "example": true
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/quadras": {
+            "get": {
+                "tags": [
+                    "Quadras"
+                ],
+                "summary": "Listar quadras ativas",
+                "operationId": "55fe97b2dc48e4feaf26788bf9ea4598",
+                "responses": {
+                    "200": {
+                        "description": "Lista de quadras ativas"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Quadras"
+                ],
+                "summary": "Criar quadra",
+                "operationId": "f7a275eacdb45ba1a8e13c136ac7be2a",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "nome",
+                                    "tipo"
+                                ],
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Quadra 1"
+                                    },
+                                    "tipo": {
+                                        "type": "string",
+                                        "example": "beach_tennis"
+                                    },
+                                    "ativa": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "ordem": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "capacidade": {
+                                        "type": "integer",
+                                        "example": 4
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Quadra criada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/quadras/{id}": {
+            "put": {
+                "tags": [
+                    "Quadras"
+                ],
+                "summary": "Editar quadra",
+                "operationId": "3a1516e782debf5efa6ea25b9e1e29fb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "nome": {
+                                        "type": "string",
+                                        "example": "Quadra 1"
+                                    },
+                                    "tipo": {
+                                        "type": "string",
+                                        "example": "beach_tennis"
+                                    },
+                                    "ordem": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "capacidade": {
+                                        "type": "integer",
+                                        "example": 4
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quadra atualizada"
+                    },
+                    "404": {
+                        "description": "Quadra nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Quadras"
+                ],
+                "summary": "Excluir quadra",
+                "operationId": "2993536b59fb998e168aae7015894626",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quadra removida"
+                    },
+                    "404": {
+                        "description": "Quadra nao encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/quadras/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Quadras"
+                ],
+                "summary": "Ativar ou desativar quadra",
+                "operationId": "9b1abe8f5ff7eac73f7d6064690c79d0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "ativa"
+                                ],
+                                "properties": {
+                                    "ativa": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status atualizado"
+                    },
+                    "404": {
+                        "description": "Quadra nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/disponibilidade": {
+            "get": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Consultar horarios disponiveis",
+                "operationId": "072ce0df3fb13dd4b4cd7c7f9aaf87c6",
+                "parameters": [
+                    {
+                        "name": "quadra_id",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-24"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Horarios disponiveis",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Horarios disponiveis listados com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "quadra_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "timezone": {
+                                                    "type": "string",
+                                                    "example": "America/Sao_Paulo"
+                                                },
+                                                "duracao_reserva_minutos": {
+                                                    "type": "integer",
+                                                    "example": 60
+                                                },
+                                                "horarios": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "hora_inicio": {
+                                                                "type": "string",
+                                                                "example": "10:00"
+                                                            },
+                                                            "hora_fim": {
+                                                                "type": "string",
+                                                                "example": "11:00"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "404": {
+                        "description": "Configuracao da agenda nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reservas": {
+            "get": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Listar reservas (admin)",
+                "operationId": "d31270690bd9559009b7c90e03ee0fe0",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-24"
+                        }
+                    },
+                    {
+                        "name": "quadra_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "confirmada"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservas listadas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reservas listadas com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "quadra_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-24"
+                                                    },
+                                                    "hora_inicio": {
+                                                        "type": "string",
+                                                        "example": "10:00"
+                                                    },
+                                                    "hora_fim": {
+                                                        "type": "string",
+                                                        "example": "11:00"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "confirmada"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Criar reserva",
+                "operationId": "982e9803d84704d154c36082a018d4e5",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quadra_id",
+                                    "data",
+                                    "hora_inicio"
+                                ],
+                                "properties": {
+                                    "quadra_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "data": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-24"
+                                    },
+                                    "hora_inicio": {
+                                        "type": "string",
+                                        "example": "10:00"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Reserva criada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reserva criada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "quadra_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_inicio": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "hora_fim": {
+                                                    "type": "string",
+                                                    "example": "11:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "pendente_pagamento"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "404": {
+                        "description": "Configuracao da agenda nao encontrada"
+                    },
+                    "409": {
+                        "description": "Horario indisponivel"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/reservas/{id}/cancelar": {
+            "post": {
+                "tags": [
+                    "Reservas Admin"
+                ],
+                "summary": "Cancelar reserva (admin)",
+                "operationId": "5bca1e7b832ad16c3fff33a733de9886",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reserva cancelada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reserva cancelada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "quadra_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_inicio": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "hora_fim": {
+                                                    "type": "string",
+                                                    "example": "11:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "cancelada"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Reserva nao encontrada"
+                    },
+                    "422": {
+                        "description": "Reserva nao pode ser cancelada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/reservas/{id}/cancelar": {
+            "post": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Cancelar reserva",
+                "operationId": "9ac1d994fa36c62497b9091191408236",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reserva cancelada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reserva cancelada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "quadra_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_inicio": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "hora_fim": {
+                                                    "type": "string",
+                                                    "example": "11:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "cancelada"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Reserva nao encontrada"
+                    },
+                    "422": {
+                        "description": "Reserva nao pode ser cancelada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/admin/reservas": {
+            "get": {
+                "tags": [
+                    "Reservas Admin"
+                ],
+                "summary": "Listar reservas (admin)",
+                "operationId": "a3aad52531e79f4f7320b5d2f36ba237",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-24"
+                        }
+                    },
+                    {
+                        "name": "quadra_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "confirmada"
+                        }
+                    },
+                    {
+                        "name": "user_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservas listadas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reservas listadas com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "quadra_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-24"
+                                                    },
+                                                    "hora_inicio": {
+                                                        "type": "string",
+                                                        "example": "10:00"
+                                                    },
+                                                    "hora_fim": {
+                                                        "type": "string",
+                                                        "example": "11:00"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "confirmada"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/minhas-reservas": {
+            "get": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Listar minhas reservas",
+                "operationId": "21110c2de5d160a792f34f13c69c3176",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-24"
+                        }
+                    },
+                    {
+                        "name": "quadra_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "pendente_pagamento"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reservas listadas",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reservas listadas com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "user_id": {
+                                                        "type": "integer",
+                                                        "example": 5
+                                                    },
+                                                    "quadra_id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-24"
+                                                    },
+                                                    "hora_inicio": {
+                                                        "type": "string",
+                                                        "example": "10:00"
+                                                    },
+                                                    "hora_fim": {
+                                                        "type": "string",
+                                                        "example": "11:00"
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "pendente_pagamento"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Listar usuarios",
+                "operationId": "12e989554c281d650dff75443acabf54",
+                "responses": {
+                    "200": {
+                        "description": "Lista de usuarios"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Criar usuario",
+                "operationId": "64da9b5a20fa4f20e947ed61b2bbb6da",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "role"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Admin"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@playero.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "ADMIN"
+                                    },
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Usuario criado"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{id}": {
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Editar usuario",
+                "operationId": "5bcda8371b3cb9f863a47620e636be9b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Admin"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@playero.com"
+                                    },
+                                    "role": {
+                                        "type": "string",
+                                        "example": "ADMIN"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Usuario atualizado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{id}/status": {
+            "patch": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Ativar ou desativar usuario",
+                "operationId": "1895838b6bbdf4324a0adcbeb1bb1c21",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "is_active"
+                                ],
+                                "properties": {
+                                    "is_active": {
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Status atualizado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/{id}/password": {
+            "put": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Atualizar senha do usuario",
+                "operationId": "18f69586fa83b872b10c88efa17dc72c",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Senha atualizada"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/users/reset-password": {
+            "post": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Redefinir senha pelo email",
+                "operationId": "79c3e3d95aba6134c4e0c4dd04edd345",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "example": "admin@playero.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "example": "12345678"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Senha redefinida"
+                    },
+                    "404": {
+                        "description": "Usuario nao encontrado"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "Token",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Autenticacao"
+        },
+        {
+            "name": "Users",
+            "description": "Usuarios"
+        },
+        {
+            "name": "Quadras",
+            "description": "Quadras"
+        },
+        {
+            "name": "Agenda",
+            "description": "Configuracao de agenda"
+        },
+        {
+            "name": "Reservas",
+            "description": "Reservas"
+        },
+        {
+            "name": "Dashboard",
+            "description": "Dashboard administrativo"
+        },
+        {
+            "name": "Administradores",
+            "description": "Gestao de administradores"
+        },
+        {
+            "name": "CMS Home",
+            "description": "Conteudo da Home"
+        },
+        {
+            "name": "Reservas Admin",
+            "description": "Reservas administrativas"
+        }
+    ]
+}
