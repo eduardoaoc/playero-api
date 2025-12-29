@@ -4,10 +4,14 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Agenda\StoreAgendaBlockingRequest;
+use App\Http\Requests\Agenda\StoreAgendaExceptionRequest;
 use App\Http\Requests\Agenda\UpdateAgendaConfigRequest;
+use App\Http\Requests\Agenda\UpdateAgendaExceptionRequest;
 use App\Models\AgendaBlocking;
+use App\Models\AgendaException;
 use App\Models\AgendaSetting;
 use App\Support\AgendaBlockingPresenter;
+use App\Support\AgendaExceptionPresenter;
 use App\Support\AgendaSettingPresenter;
 use App\Support\ApiResponse;
 use OpenApi\Annotations as OA;
@@ -154,6 +158,191 @@ class AgendaController extends Controller
             $created ? 'Configuracao da agenda criada com sucesso.' : 'Configuracao da agenda atualizada com sucesso.',
             $created ? 201 : 200
         );
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/agenda/exceptions",
+     *     tags={"Agenda"},
+     *     summary="Listar excecoes de horario",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Lista de excecoes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Excecoes de horario listadas com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
+     *                     @OA\Property(property="hora_abertura", type="string", example="10:00"),
+     *                     @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *                     @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
+     *                 )
+     *             )
+     *         )
+     *     )
+     * )
+     */
+    public function listExceptions()
+    {
+        $exceptions = AgendaException::query()
+            ->orderBy('data')
+            ->orderBy('id')
+            ->get();
+
+        return $this->successResponse(
+            $exceptions->map(fn (AgendaException $exception) => AgendaExceptionPresenter::make($exception))->all(),
+            'Excecoes de horario listadas com sucesso.'
+        );
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/agenda/exceptions",
+     *     tags={"Agenda"},
+     *     summary="Criar excecao de horario",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"data","hora_abertura","hora_fechamento"},
+     *             @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
+     *             @OA\Property(property="hora_abertura", type="string", example="10:00"),
+     *             @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *             @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Excecao criada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Excecao de horario criada com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
+     *                 @OA\Property(property="hora_abertura", type="string", example="10:00"),
+     *                 @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *                 @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=422, description="Dados invalidos")
+     * )
+     */
+    public function storeException(StoreAgendaExceptionRequest $request)
+    {
+        $exception = AgendaException::create($request->validated());
+
+        return $this->successResponse(
+            AgendaExceptionPresenter::make($exception),
+            'Excecao de horario criada com sucesso.',
+            201
+        );
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/v1/agenda/exceptions/{id}",
+     *     tags={"Agenda"},
+     *     summary="Atualizar excecao de horario",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"data","hora_abertura","hora_fechamento"},
+     *             @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
+     *             @OA\Property(property="hora_abertura", type="string", example="10:00"),
+     *             @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *             @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Excecao atualizada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Excecao de horario atualizada com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
+     *                 @OA\Property(property="hora_abertura", type="string", example="10:00"),
+     *                 @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *                 @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Excecao nao encontrada"),
+     *     @OA\Response(response=422, description="Dados invalidos")
+     * )
+     */
+    public function updateException(UpdateAgendaExceptionRequest $request, int $id)
+    {
+        $exception = AgendaException::find($id);
+
+        if (! $exception) {
+            return $this->errorResponse('Excecao de horario nao encontrada.', 404);
+        }
+
+        $exception->fill($request->validated());
+        $exception->save();
+
+        return $this->successResponse(
+            AgendaExceptionPresenter::make($exception),
+            'Excecao de horario atualizada com sucesso.'
+        );
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/agenda/exceptions/{id}",
+     *     tags={"Agenda"},
+     *     summary="Excluir excecao de horario",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Excecao removida",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Excecao de horario removida com sucesso."),
+     *             @OA\Property(property="data", nullable=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Excecao nao encontrada")
+     * )
+     */
+    public function deleteException(int $id)
+    {
+        $exception = AgendaException::find($id);
+
+        if (! $exception) {
+            return $this->errorResponse('Excecao de horario nao encontrada.', 404);
+        }
+
+        $exception->delete();
+
+        return $this->successResponse(null, 'Excecao de horario removida com sucesso.');
     }
 
     /**

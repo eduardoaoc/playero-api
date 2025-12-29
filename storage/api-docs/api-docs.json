@@ -597,6 +597,337 @@
                 ]
             }
         },
+        "/api/v1/agenda/exceptions": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Listar excecoes de horario",
+                "operationId": "3ac44ec22201694fe1d8f2623f9e54b3",
+                "responses": {
+                    "200": {
+                        "description": "Lista de excecoes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Excecoes de horario listadas com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "data": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-12-24"
+                                                    },
+                                                    "hora_abertura": {
+                                                        "type": "string",
+                                                        "example": "10:00"
+                                                    },
+                                                    "hora_fechamento": {
+                                                        "type": "string",
+                                                        "example": "18:00"
+                                                    },
+                                                    "motivo": {
+                                                        "type": "string",
+                                                        "example": "Evento interno",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Criar excecao de horario",
+                "operationId": "84c7b2f1628a64fce263d9042b909d4e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "data",
+                                    "hora_abertura",
+                                    "hora_fechamento"
+                                ],
+                                "properties": {
+                                    "data": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-24"
+                                    },
+                                    "hora_abertura": {
+                                        "type": "string",
+                                        "example": "10:00"
+                                    },
+                                    "hora_fechamento": {
+                                        "type": "string",
+                                        "example": "18:00"
+                                    },
+                                    "motivo": {
+                                        "type": "string",
+                                        "example": "Evento interno",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Excecao criada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Excecao de horario criada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_abertura": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "hora_fechamento": {
+                                                    "type": "string",
+                                                    "example": "18:00"
+                                                },
+                                                "motivo": {
+                                                    "type": "string",
+                                                    "example": "Evento interno",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/agenda/exceptions/{id}": {
+            "put": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Atualizar excecao de horario",
+                "operationId": "347bcb551cdce5e09544ac6d9387fb0d",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "data",
+                                    "hora_abertura",
+                                    "hora_fechamento"
+                                ],
+                                "properties": {
+                                    "data": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-24"
+                                    },
+                                    "hora_abertura": {
+                                        "type": "string",
+                                        "example": "10:00"
+                                    },
+                                    "hora_fechamento": {
+                                        "type": "string",
+                                        "example": "18:00"
+                                    },
+                                    "motivo": {
+                                        "type": "string",
+                                        "example": "Evento interno",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Excecao atualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Excecao de horario atualizada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_abertura": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "hora_fechamento": {
+                                                    "type": "string",
+                                                    "example": "18:00"
+                                                },
+                                                "motivo": {
+                                                    "type": "string",
+                                                    "example": "Evento interno",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Excecao nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Excluir excecao de horario",
+                "operationId": "5181ed4d320fb87362c4cae1e56b787a",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Excecao removida",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Excecao de horario removida com sucesso."
+                                        },
+                                        "data": {
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Excecao nao encontrada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/agenda/blockings": {
             "get": {
                 "tags": [

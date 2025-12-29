@@ -56,6 +56,10 @@ Route::prefix('v1')->group(function () {
         // Agenda Config e Bloqueios (admin)
         Route::get('/agenda/config', [AgendaController::class, 'getConfig']);
         Route::put('/agenda/config', [AgendaController::class, 'updateConfig']);
+        Route::get('/agenda/exceptions', [AgendaController::class, 'listExceptions']);
+        Route::post('/agenda/exceptions', [AgendaController::class, 'storeException']);
+        Route::put('/agenda/exceptions/{id}', [AgendaController::class, 'updateException']);
+        Route::delete('/agenda/exceptions/{id}', [AgendaController::class, 'deleteException']);
         Route::post('/agenda/blockings', [AgendaController::class, 'storeBlocking']);
         Route::get('/agenda/blockings', [AgendaController::class, 'listBlockings']);
         Route::delete('/agenda/blockings/{id}', [AgendaController::class, 'deleteBlocking']);

@@ -8,6 +8,7 @@ use App\Http\Requests\Reserva\ListMinhasReservasRequest;
 use App\Http\Requests\Reserva\ListReservasRequest;
 use App\Http\Requests\Reserva\StoreReservaRequest;
 use App\Models\AgendaBlocking;
+use App\Models\AgendaException;
 use App\Models\AgendaSetting;
 use App\Models\Quadra;
 use App\Models\Role;
@@ -91,14 +92,25 @@ class ReservaController extends Controller
         $quadraId = (int) $data['quadra_id'];
         $duration = (int) $setting->duracao_reserva_minutos;
 
-        $open = $this->buildDateTime($date, $setting->hora_abertura, $timezone);
-        $close = $this->buildDateTime($date, $setting->hora_fechamento, $timezone);
+        $workingHours = $this->resolveWorkingHours($date, $setting);
+        $open = $this->buildDateTime($date, $workingHours['hora_abertura'], $timezone);
+        $close = $this->buildDateTime($date, $workingHours['hora_fechamento'], $timezone);
         $now = Carbon::now($timezone);
 
         $activeDays = $this->normalizeWeekdays($setting->dias_semana_ativos ?? []);
         $weekday = $open->isoWeekday();
 
-        if (! in_array($weekday, $activeDays, true) || $open->toDateString() < $now->toDateString()) {
+        if ($open->toDateString() < $now->toDateString()) {
+            return $this->successResponse([
+                'quadra_id' => $quadraId,
+                'data' => $date,
+                'timezone' => $timezone,
+                'duracao_reserva_minutos' => $duration,
+                'horarios' => [],
+            ], 'Horarios disponiveis listados com sucesso.');
+        }
+
+        if (! $workingHours['is_exception'] && ! in_array($weekday, $activeDays, true)) {
             return $this->successResponse([
                 'quadra_id' => $quadraId,
                 'data' => $date,
@@ -216,8 +228,9 @@ class ReservaController extends Controller
 
         $start = $this->buildDateTime($date, $data['hora_inicio'], $timezone);
         $end = $start->copy()->addMinutes($duration);
-        $open = $this->buildDateTime($date, $setting->hora_abertura, $timezone);
-        $close = $this->buildDateTime($date, $setting->hora_fechamento, $timezone);
+        $workingHours = $this->resolveWorkingHours($date, $setting);
+        $open = $this->buildDateTime($date, $workingHours['hora_abertura'], $timezone);
+        $close = $this->buildDateTime($date, $workingHours['hora_fechamento'], $timezone);
 
         $now = Carbon::now($timezone);
         $activeDays = $this->normalizeWeekdays($setting->dias_semana_ativos ?? []);
@@ -226,7 +239,7 @@ class ReservaController extends Controller
             return $this->errorResponse('Horario no passado.', 422);
         }
 
-        if (! in_array($start->isoWeekday(), $activeDays, true)) {
+        if (! $workingHours['is_exception'] && ! in_array($start->isoWeekday(), $activeDays, true)) {
             return $this->errorResponse('Data fora dos dias ativos da agenda.', 422);
         }
 
@@ -660,6 +673,27 @@ class ReservaController extends Controller
     private function normalizeWeekdays(array $days): array
     {
         return array_values(array_map('intval', $days));
+    }
+
+    private function resolveWorkingHours(string $date, AgendaSetting $setting): array
+    {
+        $exception = AgendaException::query()
+            ->where('data', $date)
+            ->first();
+
+        if ($exception) {
+            return [
+                'hora_abertura' => $exception->hora_abertura,
+                'hora_fechamento' => $exception->hora_fechamento,
+                'is_exception' => true,
+            ];
+        }
+
+        return [
+            'hora_abertura' => $setting->hora_abertura,
+            'hora_fechamento' => $setting->hora_fechamento,
+            'is_exception' => false,
+        ];
     }
 
     private function isBlocked(
