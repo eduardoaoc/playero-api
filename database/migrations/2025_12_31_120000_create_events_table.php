@@ -14,7 +14,7 @@ return new class extends Migration
             $table->time('start_time');
             $table->time('end_time');
             $table->string('type');
-            $table->string('visibility')->default('public');
+            $table->string('visibility')->default('publico');
             $table->timestamps();
 
             $table->index('date');

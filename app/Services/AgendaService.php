@@ -284,6 +284,7 @@ class AgendaService
 
         $eventsByDate = Event::query()
             ->whereBetween('date', [$cursor->format('Y-m-d'), $end->format('Y-m-d')])
+            ->where('status', Event::STATUS_ACTIVE)
             ->get()
             ->groupBy(fn (Event $event) => $event->date?->format('Y-m-d'));
 
@@ -480,6 +481,7 @@ class AgendaService
     {
         return Event::query()
             ->where('date', $date)
+            ->where('status', Event::STATUS_ACTIVE)
             ->get();
     }
 

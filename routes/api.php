@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\AgendaController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\EventController;
 use App\Http\Controllers\Api\V1\HomeController;
 use App\Http\Controllers\Api\V1\QuadraController;
 use App\Http\Controllers\Api\V1\ReservaController;
@@ -39,6 +40,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/disponibilidade', [ReservaController::class, 'disponibilidade']);
         Route::get('/agenda/day', [AgendaController::class, 'dayAvailability']);
         Route::get('/agenda/month', [AgendaController::class, 'monthAvailability']);
+        Route::get('/events/calendar', [EventController::class, 'calendar']);
         Route::post('/reservas', [ReservaController::class, 'store']);
         Route::post('/reservas/{id}/cancelar', [ReservaController::class, 'cancel']);
         Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas']);
@@ -68,6 +70,9 @@ Route::prefix('v1')->group(function () {
         Route::post('/agenda/blockings', [AgendaController::class, 'storeBlocking']);
         Route::get('/agenda/blockings', [AgendaController::class, 'listBlockings']);
         Route::delete('/agenda/blockings/{id}', [AgendaController::class, 'deleteBlocking']);
+
+        // Events (admin)
+        Route::post('/events', [EventController::class, 'store']);
 
         // Reservas (admin)
         Route::get('/reservas', [ReservaController::class, 'index']);

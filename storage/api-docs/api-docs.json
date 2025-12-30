@@ -1422,6 +1422,299 @@
                 ]
             }
         },
+        "/api/v1/events": {
+            "post": {
+                "tags": [
+                    "Eventos"
+                ],
+                "summary": "Criar evento",
+                "operationId": "446e16eabb76930dc344352554f87ec9",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "name",
+                                    "type",
+                                    "date",
+                                    "start_time",
+                                    "end_time",
+                                    "location",
+                                    "visibility",
+                                    "is_paid",
+                                    "status"
+                                ],
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Aniversario Joao"
+                                    },
+                                    "type": {
+                                        "type": "string",
+                                        "example": "aniversario"
+                                    },
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-03-22"
+                                    },
+                                    "start_time": {
+                                        "type": "string",
+                                        "example": "18:00"
+                                    },
+                                    "end_time": {
+                                        "type": "string",
+                                        "example": "23:00"
+                                    },
+                                    "location": {
+                                        "type": "string",
+                                        "example": "Area VIP"
+                                    },
+                                    "max_people": {
+                                        "type": "integer",
+                                        "example": 120,
+                                        "nullable": true
+                                    },
+                                    "visibility": {
+                                        "type": "string",
+                                        "example": "publico"
+                                    },
+                                    "is_paid": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "status": {
+                                        "type": "string",
+                                        "example": "ativo"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Evento privado com musica ao vivo e buffet",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Evento criado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Evento criado com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Aniversario Joao"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "example": "aniversario"
+                                                },
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-03-22"
+                                                },
+                                                "start_time": {
+                                                    "type": "string",
+                                                    "example": "18:00"
+                                                },
+                                                "end_time": {
+                                                    "type": "string",
+                                                    "example": "23:00"
+                                                },
+                                                "location": {
+                                                    "type": "string",
+                                                    "example": "Area VIP"
+                                                },
+                                                "max_people": {
+                                                    "type": "integer",
+                                                    "example": 120
+                                                },
+                                                "visibility": {
+                                                    "type": "string",
+                                                    "example": "publico"
+                                                },
+                                                "is_paid": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "ativo"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Evento privado com musica ao vivo e buffet"
+                                                },
+                                                "created_by": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "The given data was invalid."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "date": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "The date field must be a date after or equal to today."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/events/calendar": {
+            "get": {
+                "tags": [
+                    "Eventos"
+                ],
+                "summary": "Listar eventos do calendario",
+                "operationId": "375d8c2cd734c18718bc5a1560394265",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2025-03"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Eventos agrupados por data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Eventos carregados com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "2025-03-22": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-03-22"
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "example": "18:00"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "example": "23:00"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Aniversario Joao"
+                                                            },
+                                                            "location": {
+                                                                "type": "string",
+                                                                "example": "Area VIP"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "aniversario"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "ativo"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/home": {
             "get": {
                 "tags": [
@@ -2964,6 +3257,10 @@
         {
             "name": "Agenda",
             "description": "Configuracao de agenda"
+        },
+        {
+            "name": "Eventos",
+            "description": "Eventos"
         },
         {
             "name": "Reservas",

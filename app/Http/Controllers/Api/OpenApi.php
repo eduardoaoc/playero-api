@@ -29,6 +29,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Tag(name="Users", description="Usuarios"),
  *     @OA\Tag(name="Quadras", description="Quadras"),
  *     @OA\Tag(name="Agenda", description="Configuracao de agenda"),
+ *     @OA\Tag(name="Eventos", description="Eventos"),
  *     @OA\Tag(name="Reservas", description="Reservas"),
  *     @OA\Tag(name="Dashboard", description="Dashboard administrativo"),
  *     @OA\Tag(name="Administradores", description="Gestao de administradores"),
