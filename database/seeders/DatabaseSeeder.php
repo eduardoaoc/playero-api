@@ -8,7 +8,6 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
-
     /**
      * Seed the application's database.
      */
@@ -17,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             DefaultUsersSeeder::class,
+            AgendaConfigSeeder::class,
         ]);
     }
 }

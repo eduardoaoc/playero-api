@@ -12,7 +12,7 @@ use OpenApi\Annotations as OA;
  *         description="API oficial do sistema Playero"
  *     ),
  *     @OA\Server(
- *         url="http://127.0.0.1:8000",
+ *         url=L5_SWAGGER_CONST_HOST,
  *         description="Servidor Local"
  *     ),
  *     @OA\Components(

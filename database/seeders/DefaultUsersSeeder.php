@@ -16,18 +16,9 @@ class DefaultUsersSeeder extends Seeder
         $defaults = [
             [
                 'name' => 'Super Admin',
+                'last_name' => 'Admin',
                 'email' => 'superadmin@playero.com',
                 'role' => Role::SUPER_ADMIN,
-            ],
-            [
-                'name' => 'Admin',
-                'email' => 'admin@playero.com',
-                'role' => Role::ADMIN,
-            ],
-            [
-                'name' => 'Cliente',
-                'email' => 'cliente@playero.com',
-                'role' => Role::CLIENTE,
             ],
         ];
 
@@ -36,6 +27,7 @@ class DefaultUsersSeeder extends Seeder
                 ['email' => $data['email']],
                 [
                     'name' => $data['name'],
+                    'last_name' => $data['last_name'],
                     'password' => Hash::make('12345678'),
                     'is_active' => true,
                 ]

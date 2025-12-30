@@ -9,16 +9,22 @@ use App\Http\Requests\Agenda\UpdateAgendaConfigRequest;
 use App\Http\Requests\Agenda\UpdateAgendaExceptionRequest;
 use App\Models\AgendaBlocking;
 use App\Models\AgendaException;
-use App\Models\AgendaSetting;
 use App\Support\AgendaBlockingPresenter;
 use App\Support\AgendaExceptionPresenter;
-use App\Support\AgendaSettingPresenter;
+use App\Support\AgendaConfigPresenter;
 use App\Support\ApiResponse;
+use App\Services\AgendaService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use OpenApi\Annotations as OA;
 
 class AgendaController extends Controller
 {
     use ApiResponse;
+
+    public function __construct(private readonly AgendaService $agendaService)
+    {
+    }
 
     /**
      * @OA\Get(
@@ -38,12 +44,6 @@ class AgendaController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="hora_abertura", type="string", example="08:00"),
      *                 @OA\Property(property="hora_fechamento", type="string", example="22:00"),
-     *                 @OA\Property(property="duracao_reserva_minutos", type="integer", example=60),
-     *                 @OA\Property(
-     *                     property="dias_semana_ativos",
-     *                     type="array",
-     *                     @OA\Items(type="integer", example=1)
-     *                 ),
      *                 @OA\Property(property="timezone", type="string", example="America/Sao_Paulo")
      *             )
      *         )
@@ -53,14 +53,14 @@ class AgendaController extends Controller
      */
     public function getConfig()
     {
-        $setting = AgendaSetting::query()->first();
+        $setting = $this->agendaService->getConfig();
 
         if (! $setting) {
             return $this->errorResponse('Configuracao da agenda nao encontrada.', 404);
         }
 
         return $this->successResponse(
-            AgendaSettingPresenter::make($setting),
+            AgendaConfigPresenter::make($setting),
             'Configuracao da agenda carregada com sucesso.'
         );
     }
@@ -74,15 +74,9 @@ class AgendaController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"hora_abertura","hora_fechamento","duracao_reserva_minutos","dias_semana_ativos"},
+     *             required={"hora_abertura","hora_fechamento"},
      *             @OA\Property(property="hora_abertura", type="string", example="08:00"),
      *             @OA\Property(property="hora_fechamento", type="string", example="22:00"),
-     *             @OA\Property(property="duracao_reserva_minutos", type="integer", example=60),
-     *             @OA\Property(
-     *                 property="dias_semana_ativos",
-     *                 type="array",
-     *                 @OA\Items(type="integer", example=1)
-     *             ),
      *             @OA\Property(property="timezone", type="string", example="America/Sao_Paulo")
      *         )
      *     ),
@@ -98,12 +92,6 @@ class AgendaController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="hora_abertura", type="string", example="08:00"),
      *                 @OA\Property(property="hora_fechamento", type="string", example="22:00"),
-     *                 @OA\Property(property="duracao_reserva_minutos", type="integer", example=60),
-     *                 @OA\Property(
-     *                     property="dias_semana_ativos",
-     *                     type="array",
-     *                     @OA\Items(type="integer", example=1)
-     *                 ),
      *                 @OA\Property(property="timezone", type="string", example="America/Sao_Paulo")
      *             )
      *         )
@@ -120,12 +108,6 @@ class AgendaController extends Controller
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="hora_abertura", type="string", example="08:00"),
      *                 @OA\Property(property="hora_fechamento", type="string", example="22:00"),
-     *                 @OA\Property(property="duracao_reserva_minutos", type="integer", example=60),
-     *                 @OA\Property(
-     *                     property="dias_semana_ativos",
-     *                     type="array",
-     *                     @OA\Items(type="integer", example=1)
-     *                 ),
      *                 @OA\Property(property="timezone", type="string", example="America/Sao_Paulo")
      *             )
      *         )
@@ -136,25 +118,11 @@ class AgendaController extends Controller
     public function updateConfig(UpdateAgendaConfigRequest $request)
     {
         $data = $request->validated();
-        $data['dias_semana_ativos'] = array_values(array_map('intval', $data['dias_semana_ativos']));
-
-        $setting = AgendaSetting::query()->first();
-        $created = false;
-
-        if ($setting) {
-            $setting->fill($data);
-            $setting->save();
-        } else {
-            $setting = AgendaSetting::create($data);
-            $created = true;
-        }
-
-        AgendaSetting::query()
-            ->where('id', '!=', $setting->id)
-            ->delete();
+        $setting = $this->agendaService->upsertConfig($data);
+        $created = (bool) $setting->getAttribute('was_created');
 
         return $this->successResponse(
-            AgendaSettingPresenter::make($setting),
+            AgendaConfigPresenter::make($setting),
             $created ? 'Configuracao da agenda criada com sucesso.' : 'Configuracao da agenda atualizada com sucesso.',
             $created ? 201 : 200
         );
@@ -179,8 +147,9 @@ class AgendaController extends Controller
      *                     type="object",
      *                     @OA\Property(property="id", type="integer", example=1),
      *                     @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
-     *                     @OA\Property(property="hora_abertura", type="string", example="10:00"),
-     *                     @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *                     @OA\Property(property="hora_abertura", type="string", nullable=true, example="10:00"),
+     *                     @OA\Property(property="hora_fechamento", type="string", nullable=true, example="18:00"),
+     *                     @OA\Property(property="fechado", type="boolean", example=false),
      *                     @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
      *                 )
      *             )
@@ -190,10 +159,7 @@ class AgendaController extends Controller
      */
     public function listExceptions()
     {
-        $exceptions = AgendaException::query()
-            ->orderBy('data')
-            ->orderBy('id')
-            ->get();
+        $exceptions = $this->agendaService->listExceptions();
 
         return $this->successResponse(
             $exceptions->map(fn (AgendaException $exception) => AgendaExceptionPresenter::make($exception))->all(),
@@ -210,10 +176,11 @@ class AgendaController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"data","hora_abertura","hora_fechamento"},
+     *             required={"data"},
      *             @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
-     *             @OA\Property(property="hora_abertura", type="string", example="10:00"),
-     *             @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *             @OA\Property(property="hora_abertura", type="string", nullable=true, example="10:00"),
+     *             @OA\Property(property="hora_fechamento", type="string", nullable=true, example="18:00"),
+     *             @OA\Property(property="fechado", type="boolean", example=false),
      *             @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
      *         )
      *     ),
@@ -228,8 +195,9 @@ class AgendaController extends Controller
      *                 type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
-     *                 @OA\Property(property="hora_abertura", type="string", example="10:00"),
-     *                 @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *                 @OA\Property(property="hora_abertura", type="string", nullable=true, example="10:00"),
+     *                 @OA\Property(property="hora_fechamento", type="string", nullable=true, example="18:00"),
+     *                 @OA\Property(property="fechado", type="boolean", example=false),
      *                 @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
      *             )
      *         )
@@ -239,7 +207,7 @@ class AgendaController extends Controller
      */
     public function storeException(StoreAgendaExceptionRequest $request)
     {
-        $exception = AgendaException::create($request->validated());
+        $exception = $this->agendaService->createException($request->validated());
 
         return $this->successResponse(
             AgendaExceptionPresenter::make($exception),
@@ -263,10 +231,11 @@ class AgendaController extends Controller
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"data","hora_abertura","hora_fechamento"},
+     *             required={"data"},
      *             @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
-     *             @OA\Property(property="hora_abertura", type="string", example="10:00"),
-     *             @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *             @OA\Property(property="hora_abertura", type="string", nullable=true, example="10:00"),
+     *             @OA\Property(property="hora_fechamento", type="string", nullable=true, example="18:00"),
+     *             @OA\Property(property="fechado", type="boolean", example=false),
      *             @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
      *         )
      *     ),
@@ -281,8 +250,9 @@ class AgendaController extends Controller
      *                 type="object",
      *                 @OA\Property(property="id", type="integer", example=1),
      *                 @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
-     *                 @OA\Property(property="hora_abertura", type="string", example="10:00"),
-     *                 @OA\Property(property="hora_fechamento", type="string", example="18:00"),
+     *                 @OA\Property(property="hora_abertura", type="string", nullable=true, example="10:00"),
+     *                 @OA\Property(property="hora_fechamento", type="string", nullable=true, example="18:00"),
+     *                 @OA\Property(property="fechado", type="boolean", example=false),
      *                 @OA\Property(property="motivo", type="string", nullable=true, example="Evento interno")
      *             )
      *         )
@@ -299,8 +269,7 @@ class AgendaController extends Controller
             return $this->errorResponse('Excecao de horario nao encontrada.', 404);
         }
 
-        $exception->fill($request->validated());
-        $exception->save();
+        $exception = $this->agendaService->updateException($exception, $request->validated());
 
         return $this->successResponse(
             AgendaExceptionPresenter::make($exception),
@@ -340,7 +309,7 @@ class AgendaController extends Controller
             return $this->errorResponse('Excecao de horario nao encontrada.', 404);
         }
 
-        $exception->delete();
+        $this->agendaService->deleteException($exception);
 
         return $this->successResponse(null, 'Excecao de horario removida com sucesso.');
     }
@@ -385,7 +354,15 @@ class AgendaController extends Controller
      */
     public function storeBlocking(StoreAgendaBlockingRequest $request)
     {
-        $blocking = AgendaBlocking::create($request->validated());
+        if (! $this->agendaService->getConfig()) {
+            return $this->errorResponse('Configuracao da agenda nao encontrada.', 404);
+        }
+
+        try {
+            $blocking = $this->agendaService->createBlocking($request->validated());
+        } catch (\RuntimeException $exception) {
+            return $this->errorResponse($exception->getMessage(), 422);
+        }
 
         return $this->successResponse(
             AgendaBlockingPresenter::make($blocking),
@@ -425,11 +402,7 @@ class AgendaController extends Controller
      */
     public function listBlockings()
     {
-        $blockings = AgendaBlocking::query()
-            ->orderBy('data')
-            ->orderBy('hora_inicio')
-            ->orderBy('id')
-            ->get();
+        $blockings = $this->agendaService->listBlockings();
 
         return $this->successResponse(
             $blockings->map(fn (AgendaBlocking $blocking) => AgendaBlockingPresenter::make($blocking))->all(),
@@ -469,8 +442,128 @@ class AgendaController extends Controller
             return $this->errorResponse('Bloqueio nao encontrado.', 404);
         }
 
-        $blocking->delete();
+        $this->agendaService->deleteBlocking($blocking);
 
         return $this->successResponse(null, 'Bloqueio removido com sucesso.');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/agenda/day",
+     *     tags={"Agenda"},
+     *     summary="Consultar disponibilidade por dia",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="date",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string", format="date", example="2025-01-15")
+     *     ),
+     *     @OA\Parameter(
+     *         name="quadra_id",
+     *         in="query",
+     *         required=false,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Disponibilidade do dia",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Disponibilidade carregada com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="date", type="string", format="date", example="2025-01-15"),
+     *                 @OA\Property(property="is_closed", type="boolean", example=false),
+     *                 @OA\Property(
+     *                     property="slots",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="start", type="string", example="08:00"),
+     *                         @OA\Property(property="end", type="string", example="09:00"),
+     *                         @OA\Property(property="available", type="boolean", example=true),
+     *                         @OA\Property(property="reason", type="string", nullable=true, example=null)
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Configuracao nao encontrada"),
+     *     @OA\Response(response=422, description="Dados invalidos")
+     * )
+     */
+    public function dayAvailability(Request $request)
+    {
+        $validated = $request->validate([
+            'date' => ['required', 'date_format:Y-m-d'],
+            'quadra_id' => ['nullable', 'integer', 'exists:quadras,id'],
+        ]);
+
+        try {
+            $availability = $this->agendaService->getDayAvailability(
+                Carbon::createFromFormat('Y-m-d', $validated['date']),
+                $validated['quadra_id'] ?? null
+            );
+        } catch (\RuntimeException $exception) {
+            $status = $exception->getMessage() === 'Configuracao da agenda nao encontrada.' ? 404 : 422;
+
+            return $this->errorResponse($exception->getMessage(), $status);
+        }
+
+        return $this->successResponse($availability, 'Disponibilidade carregada com sucesso.');
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/v1/agenda/month",
+     *     tags={"Agenda"},
+     *     summary="Consultar calendario mensal",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="month",
+     *         in="query",
+     *         required=true,
+     *         @OA\Schema(type="string", example="2025-01")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Calendario do mes",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Calendario carregado com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="date", type="string", format="date", example="2025-01-01"),
+     *                     @OA\Property(property="type", type="string", example="available")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Configuracao nao encontrada"),
+     *     @OA\Response(response=422, description="Dados invalidos")
+     * )
+     */
+    public function monthAvailability(Request $request)
+    {
+        $validated = $request->validate([
+            'month' => ['required', 'date_format:Y-m'],
+        ]);
+
+        try {
+            $availability = $this->agendaService->getMonthAvailability(
+                Carbon::createFromFormat('Y-m', $validated['month'])->startOfMonth()
+            );
+        } catch (\RuntimeException $exception) {
+            $status = $exception->getMessage() === 'Configuracao da agenda nao encontrada.' ? 404 : 422;
+
+            return $this->errorResponse($exception->getMessage(), $status);
+        }
+
+        return $this->successResponse($availability, 'Calendario carregado com sucesso.');
     }
 }

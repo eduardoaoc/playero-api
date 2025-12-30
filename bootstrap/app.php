@@ -45,10 +45,13 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $exceptions->render(function (ValidationException $exception, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
+                $errors = $exception->errors();
+
                 return response()->json([
                     'success' => false,
                     'message' => 'Dados invalidos.',
-                    'data' => $exception->errors(),
+                    'data' => $errors,
+                    'errors' => $errors,
                 ], 422);
             }
         });

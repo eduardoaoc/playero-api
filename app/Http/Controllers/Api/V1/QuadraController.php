@@ -7,9 +7,11 @@ use App\Http\Requests\Quadra\StoreQuadraRequest;
 use App\Http\Requests\Quadra\ToggleQuadraStatusRequest;
 use App\Http\Requests\Quadra\UpdateQuadraRequest;
 use App\Models\Quadra;
+use App\Models\Role;
 use App\Support\ActivityLogger;
 use App\Support\ApiResponse;
 use App\Support\QuadraPresenter;
+use Illuminate\Http\Request;
 use OpenApi\Annotations as OA;
 
 class QuadraController extends Controller
@@ -24,9 +26,16 @@ class QuadraController extends Controller
      *     @OA\Response(response=200, description="Lista de quadras ativas")
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
-        $quadras = Quadra::active()->ordered()->get();
+        $query = Quadra::query()->ordered();
+        $user = $request->user('sanctum');
+
+        if (! $user || ! $user->hasAnyRole([Role::ADMIN, Role::SUPER_ADMIN])) {
+            $query->active();
+        }
+
+        $quadras = $query->get();
 
         return $this->successResponse(
             $quadras->map(fn (Quadra $quadra) => QuadraPresenter::make($quadra))->all(),

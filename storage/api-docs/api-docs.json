@@ -7,7 +7,7 @@
     },
     "servers": [
         {
-            "url": "http://127.0.0.1:8000",
+            "url": "http://127.0.0.1:8001",
             "description": "Servidor Local"
         }
     ],
@@ -400,17 +400,6 @@
                                                     "type": "string",
                                                     "example": "22:00"
                                                 },
-                                                "duracao_reserva_minutos": {
-                                                    "type": "integer",
-                                                    "example": 60
-                                                },
-                                                "dias_semana_ativos": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    }
-                                                },
                                                 "timezone": {
                                                     "type": "string",
                                                     "example": "America/Sao_Paulo"
@@ -447,9 +436,7 @@
                             "schema": {
                                 "required": [
                                     "hora_abertura",
-                                    "hora_fechamento",
-                                    "duracao_reserva_minutos",
-                                    "dias_semana_ativos"
+                                    "hora_fechamento"
                                 ],
                                 "properties": {
                                     "hora_abertura": {
@@ -459,17 +446,6 @@
                                     "hora_fechamento": {
                                         "type": "string",
                                         "example": "22:00"
-                                    },
-                                    "duracao_reserva_minutos": {
-                                        "type": "integer",
-                                        "example": 60
-                                    },
-                                    "dias_semana_ativos": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer",
-                                            "example": 1
-                                        }
                                     },
                                     "timezone": {
                                         "type": "string",
@@ -509,17 +485,6 @@
                                                 "hora_fechamento": {
                                                     "type": "string",
                                                     "example": "22:00"
-                                                },
-                                                "duracao_reserva_minutos": {
-                                                    "type": "integer",
-                                                    "example": 60
-                                                },
-                                                "dias_semana_ativos": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    }
                                                 },
                                                 "timezone": {
                                                     "type": "string",
@@ -561,17 +526,6 @@
                                                 "hora_fechamento": {
                                                     "type": "string",
                                                     "example": "22:00"
-                                                },
-                                                "duracao_reserva_minutos": {
-                                                    "type": "integer",
-                                                    "example": 60
-                                                },
-                                                "dias_semana_ativos": {
-                                                    "type": "array",
-                                                    "items": {
-                                                        "type": "integer",
-                                                        "example": 1
-                                                    }
                                                 },
                                                 "timezone": {
                                                     "type": "string",
@@ -634,11 +588,17 @@
                                                     },
                                                     "hora_abertura": {
                                                         "type": "string",
-                                                        "example": "10:00"
+                                                        "example": "10:00",
+                                                        "nullable": true
                                                     },
                                                     "hora_fechamento": {
                                                         "type": "string",
-                                                        "example": "18:00"
+                                                        "example": "18:00",
+                                                        "nullable": true
+                                                    },
+                                                    "fechado": {
+                                                        "type": "boolean",
+                                                        "example": false
                                                     },
                                                     "motivo": {
                                                         "type": "string",
@@ -674,9 +634,7 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "data",
-                                    "hora_abertura",
-                                    "hora_fechamento"
+                                    "data"
                                 ],
                                 "properties": {
                                     "data": {
@@ -686,11 +644,17 @@
                                     },
                                     "hora_abertura": {
                                         "type": "string",
-                                        "example": "10:00"
+                                        "example": "10:00",
+                                        "nullable": true
                                     },
                                     "hora_fechamento": {
                                         "type": "string",
-                                        "example": "18:00"
+                                        "example": "18:00",
+                                        "nullable": true
+                                    },
+                                    "fechado": {
+                                        "type": "boolean",
+                                        "example": false
                                     },
                                     "motivo": {
                                         "type": "string",
@@ -731,11 +695,17 @@
                                                 },
                                                 "hora_abertura": {
                                                     "type": "string",
-                                                    "example": "10:00"
+                                                    "example": "10:00",
+                                                    "nullable": true
                                                 },
                                                 "hora_fechamento": {
                                                     "type": "string",
-                                                    "example": "18:00"
+                                                    "example": "18:00",
+                                                    "nullable": true
+                                                },
+                                                "fechado": {
+                                                    "type": "boolean",
+                                                    "example": false
                                                 },
                                                 "motivo": {
                                                     "type": "string",
@@ -786,9 +756,7 @@
                         "application/json": {
                             "schema": {
                                 "required": [
-                                    "data",
-                                    "hora_abertura",
-                                    "hora_fechamento"
+                                    "data"
                                 ],
                                 "properties": {
                                     "data": {
@@ -798,11 +766,17 @@
                                     },
                                     "hora_abertura": {
                                         "type": "string",
-                                        "example": "10:00"
+                                        "example": "10:00",
+                                        "nullable": true
                                     },
                                     "hora_fechamento": {
                                         "type": "string",
-                                        "example": "18:00"
+                                        "example": "18:00",
+                                        "nullable": true
+                                    },
+                                    "fechado": {
+                                        "type": "boolean",
+                                        "example": false
                                     },
                                     "motivo": {
                                         "type": "string",
@@ -843,11 +817,17 @@
                                                 },
                                                 "hora_abertura": {
                                                     "type": "string",
-                                                    "example": "10:00"
+                                                    "example": "10:00",
+                                                    "nullable": true
                                                 },
                                                 "hora_fechamento": {
                                                     "type": "string",
-                                                    "example": "18:00"
+                                                    "example": "18:00",
+                                                    "nullable": true
+                                                },
+                                                "fechado": {
+                                                    "type": "boolean",
+                                                    "example": false
                                                 },
                                                 "motivo": {
                                                     "type": "string",
@@ -1156,6 +1136,178 @@
                     },
                     "404": {
                         "description": "Bloqueio nao encontrado"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/agenda/day": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Consultar disponibilidade por dia",
+                "operationId": "b738ce8b270432601e92d4ad354404c3",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-01-15"
+                        }
+                    },
+                    {
+                        "name": "quadra_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Disponibilidade do dia",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Disponibilidade carregada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-01-15"
+                                                },
+                                                "is_closed": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "slots": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "start": {
+                                                                "type": "string",
+                                                                "example": "08:00"
+                                                            },
+                                                            "end": {
+                                                                "type": "string",
+                                                                "example": "09:00"
+                                                            },
+                                                            "available": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            },
+                                                            "reason": {
+                                                                "type": "string",
+                                                                "example": null,
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Configuracao nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/agenda/month": {
+            "get": {
+                "tags": [
+                    "Agenda"
+                ],
+                "summary": "Consultar calendario mensal",
+                "operationId": "ba5a3caa705e8bccbcc5f2d8cfb23915",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "2025-01"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Calendario do mes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Calendario carregado com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-01-01"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "available"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Configuracao nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
                     }
                 },
                 "security": [
@@ -1686,6 +1838,55 @@
                 ]
             }
         },
+        "/api/v1/quadras/disponiveis": {
+            "get": {
+                "tags": [
+                    "Quadras"
+                ],
+                "summary": "Listar quadras disponiveis",
+                "operationId": "2206764bd132bf97b6d066a66be8af5e",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-12-24"
+                        }
+                    },
+                    {
+                        "name": "hora_inicio",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "10:00"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Quadras disponiveis"
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "404": {
+                        "description": "Configuracao da agenda nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/reservas": {
             "get": {
                 "tags": [
@@ -1835,6 +2036,22 @@
                                     "hora_inicio": {
                                         "type": "string",
                                         "example": "10:00"
+                                    },
+                                    "horario": {
+                                        "type": "string",
+                                        "example": "10:00"
+                                    },
+                                    "cliente": {
+                                        "type": "string",
+                                        "example": "Joao Silva"
+                                    },
+                                    "cliente_id": {
+                                        "type": "integer",
+                                        "example": 5
+                                    },
+                                    "forma_pagamento": {
+                                        "type": "string",
+                                        "example": "PIX"
                                     }
                                 },
                                 "type": "object"
@@ -1903,11 +2120,8 @@
                     "404": {
                         "description": "Configuracao da agenda nao encontrada"
                     },
-                    "409": {
-                        "description": "Horario indisponivel"
-                    },
                     "422": {
-                        "description": "Dados invalidos"
+                        "description": "Horario indisponivel ou dados invalidos"
                     }
                 },
                 "security": [
@@ -2364,19 +2578,29 @@
                             "schema": {
                                 "required": [
                                     "name",
+                                    "last_name",
                                     "email",
+                                    "email_confirmation",
                                     "password",
                                     "password_confirmation",
-                                    "role"
+                                    "accept_terms"
                                 ],
                                 "properties": {
                                     "name": {
                                         "type": "string",
-                                        "example": "Admin"
+                                        "example": "Joao"
+                                    },
+                                    "last_name": {
+                                        "type": "string",
+                                        "example": "Silva"
                                     },
                                     "email": {
                                         "type": "string",
-                                        "example": "admin@playero.com"
+                                        "example": "joao@email.com"
+                                    },
+                                    "email_confirmation": {
+                                        "type": "string",
+                                        "example": "joao@email.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -2386,11 +2610,7 @@
                                         "type": "string",
                                         "example": "12345678"
                                     },
-                                    "role": {
-                                        "type": "string",
-                                        "example": "ADMIN"
-                                    },
-                                    "is_active": {
+                                    "accept_terms": {
                                         "type": "boolean",
                                         "example": true
                                     }
@@ -2402,17 +2622,91 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Usuario criado"
+                        "description": "Usuario criado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Usuario criado com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "Joao"
+                                                },
+                                                "last_name": {
+                                                    "type": "string",
+                                                    "example": "Silva"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "joao@email.com"
+                                                },
+                                                "role": {
+                                                    "type": "string",
+                                                    "example": "client"
+                                                },
+                                                "is_active": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "created_at": {
+                                                    "type": "string",
+                                                    "example": "2025-01-01 12:00:00"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Dados invalidos"
+                        "description": "Dados invalidos",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Dados invalidos."
+                                        },
+                                        "errors": {
+                                            "properties": {
+                                                "email": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "O email ja esta em uso."
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
-                },
-                "security": [
-                    {
-                        "bearerAuth": []
-                    }
-                ]
+                }
             }
         },
         "/api/v1/users/{id}": {

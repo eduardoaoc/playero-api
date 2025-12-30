@@ -11,11 +11,13 @@ class ReservaPresenter
         return [
             'id' => $reserva->id,
             'user_id' => $reserva->user_id,
+            'cliente' => $reserva->cliente_nome,
             'quadra_id' => $reserva->quadra_id,
             'data' => $reserva->data ? $reserva->data->format('Y-m-d') : null,
             'hora_inicio' => $reserva->hora_inicio,
             'hora_fim' => $reserva->hora_fim,
             'status' => $reserva->status,
+            'forma_pagamento' => $reserva->forma_pagamento,
         ];
     }
 }

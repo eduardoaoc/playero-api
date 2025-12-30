@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\User\StoreUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\ApiResponse;
@@ -41,68 +42,86 @@ class UserController extends Controller
      *     path="/api/v1/users",
      *     tags={"Users"},
      *     summary="Criar usuario",
-     *     security={{"bearerAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(
-     *             required={"name","email","password","password_confirmation","role"},
-     *             @OA\Property(property="name", type="string", example="Admin"),
-     *             @OA\Property(property="email", type="string", example="admin@playero.com"),
+     *             required={"name","last_name","email","email_confirmation","password","password_confirmation","accept_terms"},
+     *             @OA\Property(property="name", type="string", example="Joao"),
+     *             @OA\Property(property="last_name", type="string", example="Silva"),
+     *             @OA\Property(property="email", type="string", example="joao@email.com"),
+     *             @OA\Property(property="email_confirmation", type="string", example="joao@email.com"),
      *             @OA\Property(property="password", type="string", example="12345678"),
      *             @OA\Property(property="password_confirmation", type="string", example="12345678"),
-     *             @OA\Property(property="role", type="string", example="ADMIN"),
-     *             @OA\Property(property="is_active", type="boolean", example=true)
+     *             @OA\Property(property="accept_terms", type="boolean", example=true)
      *         )
      *     ),
-     *     @OA\Response(response=201, description="Usuario criado"),
-     *     @OA\Response(response=422, description="Dados invalidos")
+     *     @OA\Response(
+     *         response=201,
+     *         description="Usuario criado",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Usuario criado com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="Joao"),
+     *                 @OA\Property(property="last_name", type="string", example="Silva"),
+     *                 @OA\Property(property="email", type="string", example="joao@email.com"),
+     *                 @OA\Property(property="role", type="string", example="client"),
+     *                 @OA\Property(property="is_active", type="boolean", example=true),
+     *                 @OA\Property(property="created_at", type="string", example="2025-01-01 12:00:00")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Dados invalidos",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=false),
+     *             @OA\Property(property="message", type="string", example="Dados invalidos."),
+     *             @OA\Property(
+     *                 property="errors",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="email",
+     *                     type="array",
+     *                     @OA\Items(type="string", example="O email ja esta em uso.")
+     *                 )
+     *             )
+     *         )
+     *     )
      * )
      */
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', 'string', Rule::in(Role::ALL)],
-            'is_active' => ['sometimes', 'boolean'],
-        ]);
+        $data = $request->validated();
 
-        if ($validator->fails()) {
-            return $this->errorResponse('Dados invalidos.', 422, $validator->errors());
-        }
-
-        $data = $validator->validated();
-
-        if (in_array($data['role'], [Role::SUPER_ADMIN, Role::ADMIN], true)
-            && ! $request->user()->hasRole(Role::SUPER_ADMIN)) {
-            return $this->errorResponse('Sem permissao.', 403);
-        }
-
-        if ($data['role'] === Role::SUPER_ADMIN
-            && array_key_exists('is_active', $data)
-            && ! $data['is_active']) {
-            return $this->errorResponse('Super admin nao pode ser desativado.', 403);
-        }
-
-        $role = Role::where('name', $data['role'])->first();
+        $role = Role::where('name', Role::CLIENTE)->first();
         if (! $role) {
             return $this->errorResponse('Role nao encontrado.', 422);
         }
 
         $user = User::create([
             'name' => $data['name'],
+            'last_name' => $data['last_name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
-            'is_active' => $data['is_active'] ?? true,
+            'is_active' => true,
         ]);
 
         $user->roles()->sync([$role->id]);
 
-        $user->load('roles');
-
         return $this->successResponse(
-            UserPresenter::make($user),
+            [
+                'id' => $user->id,
+                'name' => $user->name,
+                'last_name' => $user->last_name,
+                'email' => $user->email,
+                'role' => 'client',
+                'is_active' => (bool) $user->is_active,
+                'created_at' => $user->created_at?->format('Y-m-d H:i:s'),
+            ],
             'Usuario criado com sucesso.',
             201
         );

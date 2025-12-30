@@ -4,9 +4,8 @@ namespace App\Http\Requests\Reserva;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 
-class StoreReservaRequest extends FormRequest
+class ListQuadrasDisponiveisRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,16 +15,8 @@ class StoreReservaRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'quadra_id' => [
-                'required',
-                'integer',
-                Rule::exists('quadras', 'id')->where('ativa', true)->whereNull('deleted_at'),
-            ],
             'data' => ['required', 'date_format:Y-m-d'],
-            'hora_inicio' => ['required', 'date_format:H:i'],
-            'forma_pagamento' => ['sometimes', 'nullable', 'string', 'max:50'],
-            'cliente' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'cliente_id' => ['sometimes', 'nullable', 'integer', Rule::exists('users', 'id')],
+            'hora_inicio' => ['sometimes', 'nullable', 'date_format:H:i'],
         ];
     }
 

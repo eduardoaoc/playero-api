@@ -31,11 +31,13 @@ class Reserva extends Model
 
     protected $fillable = [
         'user_id',
+        'cliente_nome',
         'quadra_id',
         'data',
         'hora_inicio',
         'hora_fim',
         'status',
+        'forma_pagamento',
     ];
 
     protected function casts(): array

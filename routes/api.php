@@ -30,9 +30,15 @@ Route::prefix('v1')->group(function () {
     // Home (CMS publico)
     Route::get('/home', [HomeController::class, 'show']);
 
+    // Users (publico)
+    Route::post('/users', [UserController::class, 'store']);
+
     Route::middleware('auth:sanctum')->group(function () {
         // Reservas (cliente)
+        Route::get('/quadras/disponiveis', [ReservaController::class, 'quadrasDisponiveis']);
         Route::get('/disponibilidade', [ReservaController::class, 'disponibilidade']);
+        Route::get('/agenda/day', [AgendaController::class, 'dayAvailability']);
+        Route::get('/agenda/month', [AgendaController::class, 'monthAvailability']);
         Route::post('/reservas', [ReservaController::class, 'store']);
         Route::post('/reservas/{id}/cancelar', [ReservaController::class, 'cancel']);
         Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas']);
@@ -41,7 +47,6 @@ Route::prefix('v1')->group(function () {
     // Users    
     Route::middleware(['auth:sanctum', 'role:SUPER_ADMIN|ADMIN'])->group(function () {
         Route::get('/users', [UserController::class, 'index']);
-        Route::post('/users', [UserController::class, 'store']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::patch('/users/{id}/status', [UserController::class, 'updateStatus']);
         Route::put('/users/{id}/password', [UserController::class, 'updatePassword']);
@@ -83,5 +88,6 @@ Route::prefix('v1')->group(function () {
 
         Route::get('/reservas', [ReservaController::class, 'index']);
         Route::post('/reservas/{id}/cancelar', [ReservaController::class, 'cancel']);
+        Route::post('/reservas', [ReservaController::class, 'store']);
     });
 });

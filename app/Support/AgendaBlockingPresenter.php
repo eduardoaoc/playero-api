@@ -11,10 +11,10 @@ class AgendaBlockingPresenter
         return [
             'id' => $blocking->id,
             'quadra_id' => $blocking->quadra_id,
-            'data' => $blocking->data ? $blocking->data->format('Y-m-d') : null,
-            'hora_inicio' => $blocking->hora_inicio,
-            'hora_fim' => $blocking->hora_fim,
-            'motivo' => $blocking->motivo,
+            'date' => $blocking->date ? $blocking->date->format('Y-m-d') : null,
+            'start_time' => $blocking->start_time,
+            'end_time' => $blocking->end_time,
+            'reason' => $blocking->reason,
         ];
     }
 }

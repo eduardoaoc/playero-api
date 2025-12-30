@@ -5,45 +5,33 @@ namespace App\Models;
 use App\Casts\TimeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Carbon;
 
-class AgendaException extends Model
+class AgendaConfig extends Model
 {
     use HasFactory;
 
-    protected $table = 'agenda_exceptions';
+    protected $table = 'agenda_config';
 
     protected $fillable = [
-        'date',
         'opening_time',
         'closing_time',
-        'is_closed',
-        'reason',
-        'data',
+        'slot_duration',
+        'active_days',
+        'timezone',
         'hora_abertura',
         'hora_fechamento',
-        'fechado',
-        'motivo',
+        'duracao_reserva_minutos',
+        'dias_semana_ativos',
     ];
 
     protected function casts(): array
     {
         return [
-            'date' => 'date:Y-m-d',
             'opening_time' => TimeCast::class,
             'closing_time' => TimeCast::class,
-            'is_closed' => 'boolean',
+            'slot_duration' => 'integer',
+            'active_days' => 'array',
         ];
-    }
-
-    public function getDataAttribute(): ?Carbon
-    {
-        return $this->getAttribute('date');
-    }
-
-    public function setDataAttribute($value): void
-    {
-        $this->attributes['date'] = $value;
     }
 
     public function getHoraAberturaAttribute(): ?string
@@ -66,23 +54,23 @@ class AgendaException extends Model
         $this->attributes['closing_time'] = $value;
     }
 
-    public function getFechadoAttribute(): bool
+    public function getDuracaoReservaMinutosAttribute(): ?int
     {
-        return (bool) ($this->attributes['is_closed'] ?? false);
+        return $this->getAttribute('slot_duration');
     }
 
-    public function setFechadoAttribute($value): void
+    public function setDuracaoReservaMinutosAttribute($value): void
     {
-        $this->attributes['is_closed'] = (bool) $value;
+        $this->attributes['slot_duration'] = $value;
     }
 
-    public function getMotivoAttribute(): ?string
+    public function getDiasSemanaAtivosAttribute(): array
     {
-        return $this->getAttribute('reason');
+        return $this->getAttribute('active_days') ?? [];
     }
 
-    public function setMotivoAttribute($value): void
+    public function setDiasSemanaAtivosAttribute($value): void
     {
-        $this->attributes['reason'] = $value;
+        $this->attributes['active_days'] = $value;
     }
 }
