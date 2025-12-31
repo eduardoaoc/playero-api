@@ -207,7 +207,10 @@ class AgendaController extends Controller
      */
     public function storeException(StoreAgendaExceptionRequest $request)
     {
-        $exception = $this->agendaService->createException($request->validated());
+        $payload = $request->validated();
+        $payload['created_by'] = $request->user()->id;
+
+        $exception = $this->agendaService->createException($payload);
 
         return $this->successResponse(
             AgendaExceptionPresenter::make($exception),

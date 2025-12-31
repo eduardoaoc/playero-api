@@ -31,6 +31,14 @@ class StoreAgendaExceptionRequest extends FormRequest
             $data['closing_time'] = $data['hora_fechamento'];
         }
 
+        if (array_key_exists('open_time', $data) && ! array_key_exists('opening_time', $data)) {
+            $data['opening_time'] = $data['open_time'];
+        }
+
+        if (array_key_exists('close_time', $data) && ! array_key_exists('closing_time', $data)) {
+            $data['closing_time'] = $data['close_time'];
+        }
+
         if (array_key_exists('motivo', $data) && ! array_key_exists('reason', $data)) {
             $data['reason'] = $data['motivo'];
         }

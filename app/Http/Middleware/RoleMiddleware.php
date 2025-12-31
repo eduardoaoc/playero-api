@@ -10,35 +10,32 @@ class RoleMiddleware
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        $user = $request->user();
-
-        if (! $user) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Nao autenticado.',
-                'data' => null,
-            ], 401);
+        if (! auth()->check()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $normalizedRoles = [];
+        $normalizedRoles = $this->normalizeRoles($roles);
+        if ($normalizedRoles !== [] && ! in_array(auth()->user()->role, $normalizedRoles, true)) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        return $next($request);
+    }
+
+    private function normalizeRoles(array $roles): array
+    {
+        $normalized = [];
+
         foreach ($roles as $role) {
             $parts = preg_split('/[|,]/', $role);
             foreach ($parts as $part) {
-                $part = trim((string) $part);
+                $part = strtolower(trim((string) $part));
                 if ($part !== '') {
-                    $normalizedRoles[] = $part;
+                    $normalized[] = $part;
                 }
             }
         }
 
-        if (! empty($normalizedRoles) && ! $user->hasAnyRole($normalizedRoles)) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sem permissao.',
-                'data' => null,
-            ], 403);
-        }
-
-        return $next($request);
+        return array_values(array_unique($normalized));
     }
 }

@@ -77,4 +77,13 @@ class User extends Authenticatable
     {
         return $this->roles()->whereIn('name', $roles)->exists();
     }
+
+    public function getRoleAttribute(): ?string
+    {
+        $role = $this->relationLoaded('roles')
+            ? $this->roles->sortBy('id')->first()
+            : $this->primaryRole();
+
+        return $role ? strtolower($role->name) : null;
+    }
 }

@@ -17,6 +17,58 @@ class EventController extends Controller
     use ApiResponse;
 
     /**
+     * @OA\Get(
+     *     path="/api/v1/events",
+     *     tags={"Eventos"},
+     *     summary="Listar eventos",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Eventos listados",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Eventos listados com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     @OA\Property(property="id", type="integer", example=12),
+     *                     @OA\Property(property="name", type="string", example="Aniversario Joao"),
+     *                     @OA\Property(property="type", type="string", example="aniversario"),
+     *                     @OA\Property(property="date", type="string", format="date", example="2025-03-22"),
+     *                     @OA\Property(property="start_time", type="string", example="18:00"),
+     *                     @OA\Property(property="end_time", type="string", example="23:00"),
+     *                     @OA\Property(property="location", type="string", example="Area VIP"),
+     *                     @OA\Property(property="max_people", type="integer", example=120),
+     *                     @OA\Property(property="visibility", type="string", example="publico"),
+     *                     @OA\Property(property="is_paid", type="boolean", example=true),
+     *                     @OA\Property(property="status", type="string", example="ativo"),
+     *                     @OA\Property(property="description", type="string", example="Evento privado com musica ao vivo e buffet"),
+     *                     @OA\Property(property="created_by", type="integer", example=1)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Nao autenticado"),
+     *     @OA\Response(response=403, description="Sem permissao")
+     * )
+     */
+    public function index()
+    {
+        $events = Event::query()
+            ->orderBy('date')
+            ->orderBy('start_time')
+            ->orderBy('id')
+            ->get();
+
+        return $this->successResponse(
+            $events->map(fn (Event $event) => EventPresenter::make($event))->all(),
+            'Eventos listados com sucesso.'
+        );
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/v1/events",
      *     tags={"Eventos"},

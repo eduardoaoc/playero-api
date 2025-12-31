@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\V1\UserController;
 use App\Http\Controllers\Api\V1\Admin\AdminController;
 use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use App\Http\Controllers\Api\V1\Admin\HomeController as AdminHomeController;
+use App\Http\Controllers\Api\V1\CalendarController;
 
 Route::prefix('v1')->group(function () {
 
@@ -47,7 +48,8 @@ Route::prefix('v1')->group(function () {
     });
 
     // Users    
-    Route::middleware(['auth:sanctum', 'role:SUPER_ADMIN|ADMIN'])->group(function () {
+    Route::middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function () {
+        Route::get('/clients', [UserController::class, 'clients']);
         Route::get('/users', [UserController::class, 'index']);
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::patch('/users/{id}/status', [UserController::class, 'updateStatus']);
@@ -71,7 +73,14 @@ Route::prefix('v1')->group(function () {
         Route::get('/agenda/blockings', [AgendaController::class, 'listBlockings']);
         Route::delete('/agenda/blockings/{id}', [AgendaController::class, 'deleteBlocking']);
 
+        // Calendario geral (admin)
+        Route::get('/calendar/overview', [CalendarController::class, 'overview']);
+        Route::get('/calendar/day/{date}', [CalendarController::class, 'dayDetail']);
+        Route::post('/calendar/exceptions', [CalendarController::class, 'storeException']);
+        Route::put('/calendar/exceptions/{id}', [CalendarController::class, 'updateException']);
+
         // Events (admin)
+        Route::get('/events', [EventController::class, 'index']);
         Route::post('/events', [EventController::class, 'store']);
 
         // Reservas (admin)
@@ -79,11 +88,11 @@ Route::prefix('v1')->group(function () {
     });
 
     // Painel Admin
-    Route::prefix('admin')->middleware(['auth:sanctum', 'role:SUPER_ADMIN|ADMIN'])->group(function () {
+    Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin,super_admin'])->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index']);
         Route::put('/home', [AdminHomeController::class, 'update']);
 
-        Route::middleware('role:SUPER_ADMIN')->group(function () {
+        Route::middleware('role:super_admin')->group(function () {
             Route::get('/admins', [AdminController::class, 'index']);
             Route::post('/admins', [AdminController::class, 'store']);
             Route::put('/admins/{id}', [AdminController::class, 'update']);

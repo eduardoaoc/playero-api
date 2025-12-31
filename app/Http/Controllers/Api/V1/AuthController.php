@@ -61,11 +61,13 @@ class AuthController extends Controller
         $token = $user->createToken('playero-api')->plainTextToken;
 
         $user->load('roles');
+        $role = $user->role;
 
-        return $this->successResponse([
+        return response()->json([
             'token' => $token,
-            'user' => UserPresenter::make($user),
-        ], 'Login realizado com sucesso.');
+            'user' => $this->authUserPayload($user),
+            'redirect_to' => $this->redirectTo($role),
+        ]);
     }
 
     /**
@@ -98,9 +100,14 @@ class AuthController extends Controller
      */
     public function me(Request $request)
     {
-        $user = $request->user()->load('roles');
+        $user = $request->user();
+        if (! $user) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
 
-        return $this->successResponse(UserPresenter::make($user), 'Usuario autenticado.');
+        $user->load('roles');
+
+        return response()->json($this->authUserPayload($user, true));
     }
 
     /**
@@ -129,5 +136,30 @@ class AuthController extends Controller
             'token' => $token,
             'user' => UserPresenter::make($user),
         ], 'Token renovado com sucesso.');
+    }
+
+    private function authUserPayload(User $user, bool $includeEmail = false): array
+    {
+        $payload = [
+            'id' => $user->id,
+            'name' => $user->name,
+        ];
+
+        if ($includeEmail) {
+            $payload['email'] = $user->email;
+        }
+
+        $payload['role'] = $user->role;
+
+        return $payload;
+    }
+
+    private function redirectTo(?string $role): string
+    {
+        return match ($role) {
+            'admin', 'super_admin' => '/admin/dashboard',
+            'cliente' => '/cliente/dashboard',
+            default => '/',
+        };
     }
 }

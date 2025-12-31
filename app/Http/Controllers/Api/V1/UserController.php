@@ -38,6 +38,28 @@ class UserController extends Controller
     }
 
     /**
+     * @OA\Get(
+     *     path="/api/v1/clients",
+     *     tags={"Users"},
+     *     summary="Listar clientes",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(response=200, description="Lista de clientes")
+     * )
+     */
+    public function clients()
+    {
+        $users = User::with('roles')
+            ->whereHas('roles', fn ($query) => $query->where('name', Role::CLIENTE))
+            ->orderBy('id')
+            ->get();
+
+        return $this->successResponse(
+            $users->map(fn (User $user) => UserPresenter::make($user))->all(),
+            'Clientes listados com sucesso.'
+        );
+    }
+
+    /**
      * @OA\Post(
      *     path="/api/v1/users",
      *     tags={"Users"},

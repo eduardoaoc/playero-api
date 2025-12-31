@@ -24,10 +24,7 @@ class StoreEventRequest extends FormRequest
             'max_people' => ['nullable', 'integer', 'min:1'],
             'visibility' => ['required', 'in:'.implode(',', Event::VISIBILITIES)],
             'is_paid' => ['required', 'boolean'],
-            'status' => ['required', 'in:'.implode(',', [
-                Event::STATUS_ACTIVE,
-                Event::STATUS_INACTIVE,
-            ])],
+            'status' => ['required', 'in:'.implode(',', Event::STATUSES)],
             'description' => ['nullable', 'string'],
         ];
     }

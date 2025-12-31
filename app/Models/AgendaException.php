@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\TimeCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 class AgendaException extends Model
@@ -19,6 +20,7 @@ class AgendaException extends Model
         'closing_time',
         'is_closed',
         'reason',
+        'created_by',
         'data',
         'hora_abertura',
         'hora_fechamento',
@@ -33,7 +35,13 @@ class AgendaException extends Model
             'opening_time' => TimeCast::class,
             'closing_time' => TimeCast::class,
             'is_closed' => 'boolean',
+            'created_by' => 'integer',
         ];
+    }
+
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 
     public function getDataAttribute(): ?Carbon

@@ -84,7 +84,13 @@ class AgendaService
 
     public function createException(array $payload): AgendaException
     {
-        return AgendaException::create($this->normalizeExceptionPayload($payload));
+        $normalized = $this->normalizeExceptionPayload($payload);
+
+        if (array_key_exists('created_by', $payload)) {
+            $normalized['created_by'] = $payload['created_by'];
+        }
+
+        return AgendaException::create($normalized);
     }
 
     public function updateException(AgendaException $exception, array $payload): AgendaException
@@ -365,6 +371,185 @@ class AgendaService
         return $days;
     }
 
+    public function getCalendarOverview(int $year, int $month): array
+    {
+        $config = $this->getConfig();
+
+        if (! $config) {
+            throw new RuntimeException('Configuracao da agenda nao encontrada.');
+        }
+
+        $timezone = $this->resolveTimezone($config);
+        $cursor = Carbon::create($year, $month, 1, 0, 0, 0, $timezone)->startOfMonth();
+        $end = $cursor->copy()->endOfMonth();
+        $startDate = $cursor->format('Y-m-d');
+        $endDate = $end->format('Y-m-d');
+
+        $exceptions = AgendaException::query()
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get()
+            ->keyBy(fn (AgendaException $exception) => $exception->date?->format('Y-m-d'));
+
+        $reservationCounts = Reserva::query()
+            ->selectRaw('data, count(*) as total')
+            ->whereBetween('data', [$startDate, $endDate])
+            ->whereIn('status', Reserva::ACTIVE_STATUSES)
+            ->groupBy('data')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$this->normalizeDateKey($row->data) => (int) $row->total]);
+
+        $eventCounts = Event::query()
+            ->selectRaw('date, count(*) as total')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->where('status', Event::STATUS_ACTIVE)
+            ->groupBy('date')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$this->normalizeDateKey($row->date) => (int) $row->total]);
+
+        $blockingCounts = AgendaBlocking::query()
+            ->selectRaw('date, count(*) as total')
+            ->whereBetween('date', [$startDate, $endDate])
+            ->groupBy('date')
+            ->get()
+            ->mapWithKeys(fn ($row) => [$this->normalizeDateKey($row->date) => (int) $row->total]);
+
+        $days = [];
+
+        while ($cursor->lte($end)) {
+            $dateString = $cursor->format('Y-m-d');
+            $exception = $exceptions->get($dateString);
+            $isClosed = false;
+            $isSpecialDay = false;
+            $specialHours = null;
+            $reason = null;
+            $isHoliday = false;
+
+            if ($exception) {
+                $isClosed = (bool) $exception->is_closed
+                    || $exception->opening_time === null
+                    || $exception->closing_time === null;
+                $reason = $exception->reason;
+                $isSpecialDay = ! $isClosed;
+                $isHoliday = $isClosed && $this->isHolidayReason($exception->reason);
+
+                if (! $isClosed) {
+                    $specialHours = [
+                        'open_time' => $exception->opening_time,
+                        'close_time' => $exception->closing_time,
+                    ];
+                }
+            } elseif (! $this->isActiveDay($cursor, $config->active_days)) {
+                $isClosed = true;
+            }
+
+            $reservationsCount = (int) ($reservationCounts->get($dateString) ?? 0);
+            $eventsCount = (int) ($eventCounts->get($dateString) ?? 0);
+            $blockingsCount = (int) ($blockingCounts->get($dateString) ?? 0);
+
+            $days[] = [
+                'date' => $dateString,
+                'is_closed' => $isClosed,
+                'is_holiday' => $isHoliday,
+                'is_special_day' => $isSpecialDay,
+                'special_hours' => $specialHours,
+                'reason' => $reason,
+                'reservations_count' => $reservationsCount,
+                'events_count' => $eventsCount,
+                'has_reservations' => $reservationsCount > 0,
+                'has_events' => $eventsCount > 0,
+                'has_blockings' => $blockingsCount > 0,
+            ];
+
+            $cursor->addDay();
+        }
+
+        return $days;
+    }
+
+    public function getCalendarDayDetail(Carbon $date): array
+    {
+        $config = $this->getConfig();
+
+        if (! $config) {
+            throw new RuntimeException('Configuracao da agenda nao encontrada.');
+        }
+
+        $timezone = $this->resolveTimezone($config);
+        $dateString = $date->format('Y-m-d');
+        $day = Carbon::createFromFormat('Y-m-d', $dateString, $timezone);
+        $workingHours = $this->resolveWorkingHours($day, $config);
+        $isClosed = (bool) $workingHours['is_closed'];
+        $isHoliday = $workingHours['source'] === 'exception'
+            && $isClosed
+            && $this->isHolidayReason($workingHours['reason'] ?? null);
+
+        $status = $isClosed ? 'closed' : 'open';
+        $specialHours = null;
+
+        if (! $isClosed && $workingHours['source'] === 'exception') {
+            $status = 'special_hours';
+            $specialHours = [
+                'open_time' => $workingHours['opening_time'],
+                'close_time' => $workingHours['closing_time'],
+            ];
+        }
+
+        $reservas = Reserva::query()
+            ->with(['quadra:id,nome', 'user:id,name'])
+            ->where('data', $dateString)
+            ->whereIn('status', Reserva::ACTIVE_STATUSES)
+            ->orderBy('hora_inicio')
+            ->orderBy('id')
+            ->get();
+
+        $events = Event::query()
+            ->where('date', $dateString)
+            ->where('status', Event::STATUS_ACTIVE)
+            ->orderBy('start_time')
+            ->orderBy('id')
+            ->get();
+
+        $blockings = AgendaBlocking::query()
+            ->where('date', $dateString)
+            ->orderByRaw('start_time is null')
+            ->orderBy('start_time')
+            ->orderBy('id')
+            ->get();
+
+        return [
+            'date' => $dateString,
+            'status' => $status,
+            'is_closed' => $isClosed,
+            'is_holiday' => $isHoliday,
+            'special_hours' => $specialHours,
+            'reason' => $workingHours['reason'],
+            'reservations' => $reservas->map(fn (Reserva $reserva) => [
+                'id' => $reserva->id,
+                'quadra' => $reserva->quadra?->nome,
+                'start_time' => $reserva->hora_inicio,
+                'end_time' => $reserva->hora_fim,
+                'client_name' => $reserva->cliente_nome ?: $reserva->user?->name,
+                'status' => $reserva->status,
+                'payment_status' => $this->mapPaymentStatus($reserva),
+            ])->values()->all(),
+            'events' => $events->map(fn (Event $event) => [
+                'id' => $event->id,
+                'title' => $event->name,
+                'type' => $event->type,
+                'start_time' => $event->start_time,
+                'end_time' => $event->end_time,
+                'location' => $event->location,
+            ])->values()->all(),
+            'blockings' => $blockings->map(fn (AgendaBlocking $blocking) => [
+                'id' => $blocking->id,
+                'start_time' => $blocking->start_time,
+                'end_time' => $blocking->end_time,
+                'reason' => $blocking->reason,
+                'quadra_id' => $blocking->quadra_id,
+            ])->values()->all(),
+        ];
+    }
+
     private function resolveTimezone(AgendaConfig $config): string
     {
         $timezone = $config->timezone;
@@ -374,6 +559,26 @@ class AgendaService
         }
 
         return self::DEFAULT_TIMEZONE;
+    }
+
+    private function normalizeDateKey($value): string
+    {
+        if ($value instanceof Carbon) {
+            return $value->format('Y-m-d');
+        }
+
+        return (string) $value;
+    }
+
+    private function isHolidayReason(?string $reason): bool
+    {
+        if (! $reason) {
+            return false;
+        }
+
+        $normalized = strtolower($reason);
+
+        return str_contains($normalized, 'feriado') || str_contains($normalized, 'holiday');
     }
 
     private function resolveWorkingHours(Carbon $date, AgendaConfig $config): array
@@ -419,8 +624,8 @@ class AgendaService
     {
         $isClosed = (bool) ($payload['is_closed'] ?? false);
 
-        $opening = $payload['opening_time'] ?? null;
-        $closing = $payload['closing_time'] ?? null;
+        $opening = $payload['opening_time'] ?? ($payload['open_time'] ?? null);
+        $closing = $payload['closing_time'] ?? ($payload['close_time'] ?? null);
 
         if ($isClosed) {
             $opening = null;
@@ -571,6 +776,17 @@ class AgendaService
         Carbon $otherEnd
     ): bool {
         return $start->lt($otherEnd) && $end->gt($otherStart);
+    }
+
+    private function mapPaymentStatus(Reserva $reserva): ?string
+    {
+        return match ($reserva->status) {
+            Reserva::STATUS_PENDENTE_PAGAMENTO => 'pendente',
+            Reserva::STATUS_CONFIRMADA => 'pago',
+            Reserva::STATUS_CANCELADA => 'cancelado',
+            Reserva::STATUS_EXPIRADA => 'expirado',
+            default => null,
+        };
     }
 
     private function ensureBlockingWithinHours(array $payload): void
