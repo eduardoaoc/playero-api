@@ -246,4 +246,35 @@ class EventController extends Controller
 
         return $this->successResponse($grouped, 'Eventos carregados com sucesso.');
     }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/events/{id}",
+     *     tags={"Eventos"},
+     *     summary="Deletar evento",
+     *     security={{"bearerAuth":{}}}, 
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=12)
+     *     ),
+     *     @OA\Response(response=204, description="Evento deletado"),
+     *     @OA\Response(response=401, description="Nao autenticado"),
+     *     @OA\Response(response=403, description="Sem permissao"),
+     *     @OA\Response(response=404, description="Evento nao encontrado")
+     * )
+     */
+    public function destroy(int $id)
+    {
+        $event = Event::find($id);
+
+        if (! $event) {
+            return $this->errorResponse('Evento nao encontrado.', 404);
+        }
+
+        $event->delete();
+
+        return response()->noContent();
+    }
 }

@@ -7,17 +7,22 @@ use App\Http\Requests\Agenda\StoreAgendaExceptionRequest;
 use App\Http\Requests\Agenda\UpdateAgendaExceptionRequest;
 use App\Models\AgendaException;
 use App\Services\AgendaService;
+use App\Services\CalendarService;
 use App\Support\ApiResponse;
 use App\Support\CalendarExceptionPresenter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use OpenApi\Annotations as OA;
 
 class CalendarController extends Controller
 {
     use ApiResponse;
 
-    public function __construct(private readonly AgendaService $agendaService)
+    public function __construct(
+        private readonly AgendaService $agendaService,
+        private readonly CalendarService $calendarService
+    )
     {
     }
 
@@ -48,26 +53,52 @@ class CalendarController extends Controller
      *             @OA\Property(property="message", type="string", example="Calendario geral carregado com sucesso."),
      *             @OA\Property(
      *                 property="data",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     type="object",
-     *                     @OA\Property(property="date", type="string", format="date", example="2025-02-10"),
-     *                     @OA\Property(property="is_closed", type="boolean", example=false),
-     *                     @OA\Property(property="is_holiday", type="boolean", example=false),
-     *                     @OA\Property(property="is_special_day", type="boolean", example=false),
-     *                     @OA\Property(
-     *                         property="special_hours",
-     *                         nullable=true,
+     *                 type="object",
+     *                 @OA\Property(property="month", type="integer", example=12),
+     *                 @OA\Property(property="year", type="integer", example=2025),
+     *                 @OA\Property(
+     *                     property="days",
+     *                     type="array",
+     *                     @OA\Items(
      *                         type="object",
-     *                         @OA\Property(property="open_time", type="string", example="10:00"),
-     *                         @OA\Property(property="close_time", type="string", example="16:00")
-     *                     ),
-     *                     @OA\Property(property="reason", type="string", nullable=true, example=null),
-     *                     @OA\Property(property="reservations_count", type="integer", example=6),
-     *                     @OA\Property(property="events_count", type="integer", example=1),
-     *                     @OA\Property(property="has_reservations", type="boolean", example=true),
-     *                     @OA\Property(property="has_events", type="boolean", example=true),
-     *                     @OA\Property(property="has_blockings", type="boolean", example=false)
+     *                         @OA\Property(property="date", type="string", format="date", example="2025-12-05"),
+     *                         @OA\Property(
+     *                             property="reservations",
+     *                             type="array",
+     *                             @OA\Items(
+     *                                 type="object",
+     *                                 @OA\Property(property="id", type="integer", example=10),
+     *                                 @OA\Property(property="quadra", type="string", example="Quadra 01"),
+     *                                 @OA\Property(property="start_time", type="string", example="18:00"),
+     *                                 @OA\Property(property="end_time", type="string", example="19:00"),
+     *                                 @OA\Property(property="status", type="string", example="CONFIRMADA"),
+     *                                 @OA\Property(property="payment_method", type="string", example="PIX"),
+     *                                 @OA\Property(property="value", type="number", example=0)
+     *                             )
+     *                         ),
+     *                         @OA\Property(
+     *                             property="events",
+     *                             type="array",
+     *                             @OA\Items(
+     *                                 type="object",
+     *                                 @OA\Property(property="id", type="integer", example=3),
+     *                                 @OA\Property(property="title", type="string", example="Aniversario Infantil"),
+     *                                 @OA\Property(property="type", type="string", example="privado"),
+     *                                 @OA\Property(property="start", type="string", example="15:00"),
+     *                                 @OA\Property(property="end", type="string", example="18:00")
+     *                             )
+     *                         ),
+     *                         @OA\Property(
+     *                             property="blockings",
+     *                             type="array",
+     *                             @OA\Items(
+     *                                 type="object",
+     *                                 @OA\Property(property="id", type="integer", example=2),
+     *                                 @OA\Property(property="reason", type="string", example="Natal")
+     *                             )
+     *                         ),
+     *                         @OA\Property(property="closed_all_day", type="boolean", example=false)
+     *                     )
      *                 )
      *             )
      *         )
@@ -86,7 +117,7 @@ class CalendarController extends Controller
         ]);
 
         try {
-            $overview = $this->agendaService->getCalendarOverview(
+            $overview = $this->calendarService->getOverview(
                 (int) $validated['year'],
                 (int) $validated['month']
             );
@@ -96,7 +127,15 @@ class CalendarController extends Controller
             return $this->errorResponse($exception->getMessage(), $status);
         }
 
-        return $this->successResponse($overview, 'Calendario geral carregado com sucesso.');
+        $response = [
+            'month' => (int) $validated['month'],
+            'year' => (int) $validated['year'],
+            'days' => $overview,
+        ];
+
+        Log::info('Calendar overview payload', $response);
+
+        return $this->successResponse($response, 'Calendario geral carregado com sucesso.');
     }
 
     /**

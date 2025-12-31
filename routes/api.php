@@ -35,15 +35,17 @@ Route::prefix('v1')->group(function () {
     // Users (publico)
     Route::post('/users', [UserController::class, 'store']);
 
+    // Reservas (publico)
+    Route::get('/disponibilidade', [ReservaController::class, 'disponibilidade']);
+    Route::post('/reservas/guest', [ReservaController::class, 'storeGuest']);
+
     Route::middleware('auth:sanctum')->group(function () {
         // Reservas (cliente)
         Route::get('/quadras/disponiveis', [ReservaController::class, 'quadrasDisponiveis']);
-        Route::get('/disponibilidade', [ReservaController::class, 'disponibilidade']);
         Route::get('/agenda/day', [AgendaController::class, 'dayAvailability']);
         Route::get('/agenda/month', [AgendaController::class, 'monthAvailability']);
         Route::get('/events/calendar', [EventController::class, 'calendar']);
         Route::post('/reservas', [ReservaController::class, 'store']);
-        Route::post('/reservas/{id}/cancelar', [ReservaController::class, 'cancel']);
         Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas']);
     });
 
@@ -82,9 +84,15 @@ Route::prefix('v1')->group(function () {
         // Events (admin)
         Route::get('/events', [EventController::class, 'index']);
         Route::post('/events', [EventController::class, 'store']);
+        Route::delete('/events/{id}', [EventController::class, 'destroy']);
 
         // Reservas (admin)
         Route::get('/reservas', [ReservaController::class, 'index']);
+        Route::delete('/reservas/{id}', [ReservaController::class, 'destroy']);
+    });
+
+    Route::middleware(['auth:sanctum', 'role:cliente'])->group(function () {
+        Route::post('/minhas-reservas/{id}/cancelar', [ReservaController::class, 'cancelMyReservation']);
     });
 
     // Painel Admin

@@ -7,6 +7,7 @@ use App\Http\Requests\Reserva\DisponibilidadeRequest;
 use App\Http\Requests\Reserva\ListQuadrasDisponiveisRequest;
 use App\Http\Requests\Reserva\ListMinhasReservasRequest;
 use App\Http\Requests\Reserva\ListReservasRequest;
+use App\Http\Requests\Reserva\StoreGuestReservaRequest;
 use App\Http\Requests\Reserva\StoreReservaRequest;
 use App\Models\Quadra;
 use App\Models\Role;
@@ -21,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Hash;
 use OpenApi\Annotations as OA;
 
 class ReservaController extends Controller
@@ -38,7 +40,6 @@ class ReservaController extends Controller
      *     path="/api/v1/disponibilidade",
      *     tags={"Reservas"},
      *     summary="Consultar horarios disponiveis",
-     *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="quadra_id",
      *         in="query",
@@ -76,7 +77,6 @@ class ReservaController extends Controller
      *             )
      *         )
      *     ),
-     *     @OA\Response(response=401, description="Nao autenticado"),
      *     @OA\Response(response=404, description="Configuracao da agenda nao encontrada"),
      *     @OA\Response(response=422, description="Dados invalidos")
      * )
@@ -375,8 +375,163 @@ class ReservaController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/admin/reservas/{id}/cancelar",
-     *     tags={"Reservas Admin"},
+     *     path="/api/v1/reservas/guest",
+     *     tags={"Reservas"},
+     *     summary="Criar usuario e reserva (guest)",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"user","reserva"},
+     *             @OA\Property(
+     *                 property="user",
+     *                 type="object",
+     *                 required={"name","email","password","password_confirmation"},
+     *                 @OA\Property(property="name", type="string", example="Joao Silva"),
+     *                 @OA\Property(property="email", type="string", example="joao@email.com"),
+     *                 @OA\Property(property="password", type="string", example="12345678"),
+     *                 @OA\Property(property="password_confirmation", type="string", example="12345678")
+     *             ),
+     *             @OA\Property(
+     *                 property="reserva",
+     *                 type="object",
+     *                 required={"quadra_id","date","start_time","end_time"},
+     *                 @OA\Property(property="quadra_id", type="integer", example=1),
+     *                 @OA\Property(property="date", type="string", format="date", example="2026-01-10"),
+     *                 @OA\Property(property="start_time", type="string", example="10:00"),
+     *                 @OA\Property(property="end_time", type="string", example="11:00")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Reserva criada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="token"),
+     *             @OA\Property(
+     *                 property="user",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=10),
+     *                 @OA\Property(property="role", type="string", example="cliente")
+     *             ),
+     *             @OA\Property(
+     *                 property="reserva",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=99),
+     *                 @OA\Property(property="status", type="string", example="confirmada")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=404, description="Configuracao da agenda nao encontrada"),
+     *     @OA\Response(response=422, description="Dados invalidos ou horario indisponivel")
+     * )
+     */
+    public function storeGuest(StoreGuestReservaRequest $request)
+    {
+        $payload = $request->validated();
+        $userData = $payload['user'];
+        $reservaData = $payload['reserva'];
+
+        $this->expirePendentes();
+
+        $config = $this->agendaService->getConfig();
+        if (! $config) {
+            return $this->errorResponse('Configuracao da agenda nao encontrada.', 404);
+        }
+
+        $date = $reservaData['data'];
+        $quadraId = (int) $reservaData['quadra_id'];
+        $horaInicio = $reservaData['hora_inicio'];
+        $horaFimRequest = $reservaData['hora_fim'] ?? null;
+        $timezone = $this->agendaService->getTimezone($config);
+
+        try {
+            $slotAvailability = $this->agendaService->getSlotAvailability(
+                Carbon::createFromFormat('Y-m-d', $date),
+                $horaInicio,
+                $quadraId
+            );
+        } catch (\RuntimeException $exception) {
+            return $this->errorResponse($exception->getMessage(), 422);
+        }
+
+        if (! $slotAvailability['available']) {
+            return $this->errorResponse(
+                $this->mapSlotReasonToMessage($slotAvailability['reason']),
+                422
+            );
+        }
+
+        if ($horaFimRequest && $slotAvailability['end_time'] !== $horaFimRequest) {
+            return $this->errorResponse('Horario final invalido.', 422);
+        }
+
+        $start = Carbon::createFromFormat('Y-m-d H:i', $date.' '.$horaInicio, $timezone);
+        $end = Carbon::createFromFormat('Y-m-d H:i', $date.' '.$slotAvailability['end_time'], $timezone);
+        $horaInicioDb = $start->format('H:i:s');
+        $horaFimDb = $end->format('H:i:s');
+
+        return DB::transaction(function () use (
+            $userData,
+            $quadraId,
+            $date,
+            $horaInicioDb,
+            $horaFimDb
+        ) {
+            $role = Role::where('name', Role::CLIENTE)->first();
+            if (! $role) {
+                return $this->errorResponse('Role nao encontrado.', 422);
+            }
+
+            $quadra = Quadra::query()->where('id', $quadraId)->lockForUpdate()->first();
+
+            if (! $quadra || ! $quadra->ativa) {
+                return $this->errorResponse('Quadra nao encontrada ou inativa.', 422);
+            }
+
+            if ($this->agendaService->hasReservationConflict($quadraId, $date, $horaInicioDb, $horaFimDb)) {
+                return $this->errorResponse('Horario indisponivel.', 422);
+            }
+
+            $user = User::create([
+                'name' => trim($userData['name']),
+                'last_name' => $this->resolveLastName($userData['name']),
+                'email' => $userData['email'],
+                'password' => Hash::make($userData['password']),
+                'is_active' => true,
+            ]);
+
+            $user->roles()->sync([$role->id]);
+
+            $reserva = Reserva::create([
+                'user_id' => $user->id,
+                'cliente_nome' => $user->name,
+                'quadra_id' => $quadraId,
+                'data' => $date,
+                'hora_inicio' => $horaInicioDb,
+                'hora_fim' => $horaFimDb,
+                'status' => Reserva::STATUS_PENDENTE_PAGAMENTO,
+            ]);
+
+            $token = $user->createToken('playero-api')->plainTextToken;
+
+            return response()->json([
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'role' => $user->role,
+                ],
+                'reserva' => [
+                    'id' => $reserva->id,
+                    'status' => $reserva->status,
+                ],
+            ], 201);
+        });
+    }
+
+    /**
+     * @OA\Delete(
+     *     path="/api/v1/reservas/{id}",
+     *     tags={"Reservas"},
      *     summary="Cancelar reserva (admin)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
@@ -409,11 +564,25 @@ class ReservaController extends Controller
      *     @OA\Response(response=404, description="Reserva nao encontrada"),
      *     @OA\Response(response=422, description="Reserva nao pode ser cancelada")
      * )
-     *
+     */
+    public function destroy(Request $request, int $id)
+    {
+        $this->expirePendentes();
+
+        $reserva = Reserva::find($id);
+
+        if (! $reserva) {
+            return $this->errorResponse('Reserva nao encontrada.', 404);
+        }
+
+        return $this->cancelReserva($request, $reserva);
+    }
+
+    /**
      * @OA\Post(
-     *     path="/api/v1/reservas/{id}/cancelar",
-     *     tags={"Reservas"},
-     *     summary="Cancelar reserva",
+     *     path="/api/v1/admin/reservas/{id}/cancelar",
+     *     tags={"Reservas Admin"},
+     *     summary="Cancelar reserva (admin)",
      *     security={{"bearerAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
@@ -458,31 +627,61 @@ class ReservaController extends Controller
 
         Gate::authorize('cancel', $reserva);
 
-        if (in_array($reserva->status, [Reserva::STATUS_CANCELADA, Reserva::STATUS_EXPIRADA], true)) {
-            return $this->errorResponse('Reserva nao pode ser cancelada.', 422);
+        return $this->cancelReserva($request, $reserva);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/v1/minhas-reservas/{id}/cancelar",
+     *     tags={"Reservas"},
+     *     summary="Cancelar minha reserva",
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Reserva cancelada",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="message", type="string", example="Reserva cancelada com sucesso."),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="user_id", type="integer", example=5),
+     *                 @OA\Property(property="quadra_id", type="integer", example=1),
+     *                 @OA\Property(property="data", type="string", format="date", example="2025-12-24"),
+     *                 @OA\Property(property="hora_inicio", type="string", example="10:00"),
+     *                 @OA\Property(property="hora_fim", type="string", example="11:00"),
+     *                 @OA\Property(property="status", type="string", example="cancelada")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Nao autenticado"),
+     *     @OA\Response(response=403, description="Sem permissao"),
+     *     @OA\Response(response=404, description="Reserva nao encontrada"),
+     *     @OA\Response(response=422, description="Reserva nao pode ser cancelada")
+     * )
+     */
+    public function cancelMyReservation(Request $request, int $id)
+    {
+        $this->expirePendentes();
+
+        $reserva = Reserva::find($id);
+
+        if (! $reserva) {
+            return $this->errorResponse('Reserva nao encontrada.', 404);
         }
 
-        $previous = $reserva->status;
-        $reserva->status = Reserva::STATUS_CANCELADA;
-        $reserva->save();
+        if ($reserva->user_id !== $request->user()->id) {
+            return $this->errorResponse('Sem permissao.', 403);
+        }
 
-        ActivityLogger::log(
-            $request,
-            'reserva_cancelada',
-            'Reserva cancelada.',
-            $reserva,
-            [
-                'reserva_id' => $reserva->id,
-                'before' => $previous,
-                'after' => $reserva->status,
-                'by_admin' => $request->user()->hasAnyRole([Role::ADMIN, Role::SUPER_ADMIN]),
-            ]
-        );
-
-        return $this->successResponse(
-            ReservaPresenter::make($reserva),
-            'Reserva cancelada com sucesso.'
-        );
+        return $this->cancelReserva($request, $reserva);
     }
 
     /**
@@ -722,6 +921,37 @@ class ReservaController extends Controller
         Reserva::expirePendentes(Carbon::now(self::DEFAULT_TIMEZONE));
     }
 
+    private function cancelReserva(Request $request, Reserva $reserva)
+    {
+        if (in_array($reserva->status, [Reserva::STATUS_CANCELADA, Reserva::STATUS_EXPIRADA], true)) {
+            return $this->errorResponse('Reserva nao pode ser cancelada.', 422);
+        }
+
+        $previous = $reserva->status;
+        $reserva->status = Reserva::STATUS_CANCELADA;
+        $reserva->cancelled_at = Carbon::now(self::DEFAULT_TIMEZONE);
+        $reserva->cancelled_by = $request->user()->id;
+        $reserva->save();
+
+        ActivityLogger::log(
+            $request,
+            'reserva_cancelada',
+            'Reserva cancelada.',
+            $reserva,
+            [
+                'reserva_id' => $reserva->id,
+                'before' => $previous,
+                'after' => $reserva->status,
+                'by_admin' => $request->user()->hasAnyRole([Role::ADMIN, Role::SUPER_ADMIN]),
+            ]
+        );
+
+        return $this->successResponse(
+            ReservaPresenter::make($reserva),
+            'Reserva cancelada com sucesso.'
+        );
+    }
+
     private function mapSlotReasonToMessage(?string $reason): string
     {
         return match ($reason) {
@@ -732,5 +962,16 @@ class ReservaController extends Controller
             'event' => 'Horario indisponivel: evento.',
             default => 'Horario indisponivel.',
         };
+    }
+
+    private function resolveLastName(string $name): string
+    {
+        $parts = preg_split('/\s+/', trim($name));
+
+        if (! is_array($parts) || count($parts) < 2) {
+            return '';
+        }
+
+        return (string) array_pop($parts);
     }
 }

@@ -1422,7 +1422,736 @@
                 ]
             }
         },
+        "/api/v1/calendar/overview": {
+            "get": {
+                "tags": [
+                    "Calendario"
+                ],
+                "summary": "Consultar calendario geral do mes",
+                "description": "Consolida reservas, eventos, bloqueios e excecoes para o mes informado.",
+                "operationId": "3cf2141c45b6ed8615eaa90006e1d7b5",
+                "parameters": [
+                    {
+                        "name": "month",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "maximum": 12,
+                            "minimum": 1,
+                            "example": 2
+                        }
+                    },
+                    {
+                        "name": "year",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2025
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Calendario carregado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Calendario geral carregado com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "month": {
+                                                    "type": "integer",
+                                                    "example": 12
+                                                },
+                                                "year": {
+                                                    "type": "integer",
+                                                    "example": 2025
+                                                },
+                                                "days": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "date": {
+                                                                "type": "string",
+                                                                "format": "date",
+                                                                "example": "2025-12-05"
+                                                            },
+                                                            "reservations": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 10
+                                                                        },
+                                                                        "quadra": {
+                                                                            "type": "string",
+                                                                            "example": "Quadra 01"
+                                                                        },
+                                                                        "start_time": {
+                                                                            "type": "string",
+                                                                            "example": "18:00"
+                                                                        },
+                                                                        "end_time": {
+                                                                            "type": "string",
+                                                                            "example": "19:00"
+                                                                        },
+                                                                        "status": {
+                                                                            "type": "string",
+                                                                            "example": "CONFIRMADA"
+                                                                        },
+                                                                        "payment_method": {
+                                                                            "type": "string",
+                                                                            "example": "PIX"
+                                                                        },
+                                                                        "value": {
+                                                                            "type": "number",
+                                                                            "example": 0
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "events": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 3
+                                                                        },
+                                                                        "title": {
+                                                                            "type": "string",
+                                                                            "example": "Aniversario Infantil"
+                                                                        },
+                                                                        "type": {
+                                                                            "type": "string",
+                                                                            "example": "privado"
+                                                                        },
+                                                                        "start": {
+                                                                            "type": "string",
+                                                                            "example": "15:00"
+                                                                        },
+                                                                        "end": {
+                                                                            "type": "string",
+                                                                            "example": "18:00"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "blockings": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 2
+                                                                        },
+                                                                        "reason": {
+                                                                            "type": "string",
+                                                                            "example": "Natal"
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            },
+                                                            "closed_all_day": {
+                                                                "type": "boolean",
+                                                                "example": false
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Configuracao nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/calendar/day/{date}": {
+            "get": {
+                "tags": [
+                    "Calendario"
+                ],
+                "summary": "Consultar detalhe de um dia",
+                "description": "Retorna reservas, eventos e bloqueios do dia informado.",
+                "operationId": "619541c9e58b989eaa411143d2d2e266",
+                "parameters": [
+                    {
+                        "name": "date",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "date",
+                            "example": "2025-02-10"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Detalhe carregado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Detalhe do dia carregado com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-02-10"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "open"
+                                                },
+                                                "is_closed": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "is_holiday": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "special_hours": {
+                                                    "properties": {
+                                                        "open_time": {
+                                                            "type": "string",
+                                                            "example": "10:00"
+                                                        },
+                                                        "close_time": {
+                                                            "type": "string",
+                                                            "example": "16:00"
+                                                        }
+                                                    },
+                                                    "type": "object",
+                                                    "nullable": true
+                                                },
+                                                "reason": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "reservations": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "quadra": {
+                                                                "type": "string",
+                                                                "example": "Quadra 01"
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "example": "18:00"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "example": "19:00"
+                                                            },
+                                                            "client_name": {
+                                                                "type": "string",
+                                                                "example": "Joao Silva"
+                                                            },
+                                                            "status": {
+                                                                "type": "string",
+                                                                "example": "confirmada"
+                                                            },
+                                                            "payment_status": {
+                                                                "type": "string",
+                                                                "example": "pago"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "events": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 3
+                                                            },
+                                                            "title": {
+                                                                "type": "string",
+                                                                "example": "Aniversario Infantil"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "aniversario"
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "example": "15:00"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "example": "18:00"
+                                                            },
+                                                            "location": {
+                                                                "type": "string",
+                                                                "example": "Area Kids"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "blockings": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 7
+                                                            },
+                                                            "start_time": {
+                                                                "type": "string",
+                                                                "example": "08:00"
+                                                            },
+                                                            "end_time": {
+                                                                "type": "string",
+                                                                "example": "10:00"
+                                                            },
+                                                            "reason": {
+                                                                "type": "string",
+                                                                "example": "Manutencao"
+                                                            },
+                                                            "quadra_id": {
+                                                                "type": "integer",
+                                                                "example": null,
+                                                                "nullable": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Configuracao nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/calendar/exceptions": {
+            "post": {
+                "tags": [
+                    "Calendario"
+                ],
+                "summary": "Criar excecao de calendario",
+                "operationId": "4b9e6f1e5a45b38e29c1ba14fba888ef",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "date"
+                                ],
+                                "properties": {
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-25"
+                                    },
+                                    "is_closed": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "open_time": {
+                                        "type": "string",
+                                        "example": "10:00",
+                                        "nullable": true
+                                    },
+                                    "close_time": {
+                                        "type": "string",
+                                        "example": "16:00",
+                                        "nullable": true
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Natal",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Excecao criada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Excecao de calendario criada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-25"
+                                                },
+                                                "is_closed": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                },
+                                                "open_time": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "close_time": {
+                                                    "type": "string",
+                                                    "example": null,
+                                                    "nullable": true
+                                                },
+                                                "reason": {
+                                                    "type": "string",
+                                                    "example": "Natal",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/calendar/exceptions/{id}": {
+            "put": {
+                "tags": [
+                    "Calendario"
+                ],
+                "summary": "Atualizar excecao de calendario",
+                "operationId": "96cde0582f5bba0c5b47b2e183211a0f",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "date"
+                                ],
+                                "properties": {
+                                    "date": {
+                                        "type": "string",
+                                        "format": "date",
+                                        "example": "2025-12-31"
+                                    },
+                                    "is_closed": {
+                                        "type": "boolean",
+                                        "example": false
+                                    },
+                                    "open_time": {
+                                        "type": "string",
+                                        "example": "10:00",
+                                        "nullable": true
+                                    },
+                                    "close_time": {
+                                        "type": "string",
+                                        "example": "16:00",
+                                        "nullable": true
+                                    },
+                                    "reason": {
+                                        "type": "string",
+                                        "example": "Vespera de ano novo",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Excecao atualizada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Excecao de calendario atualizada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "date": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-31"
+                                                },
+                                                "is_closed": {
+                                                    "type": "boolean",
+                                                    "example": false
+                                                },
+                                                "open_time": {
+                                                    "type": "string",
+                                                    "example": "10:00",
+                                                    "nullable": true
+                                                },
+                                                "close_time": {
+                                                    "type": "string",
+                                                    "example": "16:00",
+                                                    "nullable": true
+                                                },
+                                                "reason": {
+                                                    "type": "string",
+                                                    "example": "Vespera de ano novo",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Excecao nao encontrada"
+                    },
+                    "422": {
+                        "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/events": {
+            "get": {
+                "tags": [
+                    "Eventos"
+                ],
+                "summary": "Listar eventos",
+                "operationId": "1845dc9126717378ecce57f9863a2775",
+                "responses": {
+                    "200": {
+                        "description": "Eventos listados",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Eventos listados com sucesso."
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 12
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Aniversario Joao"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "aniversario"
+                                                    },
+                                                    "date": {
+                                                        "type": "string",
+                                                        "format": "date",
+                                                        "example": "2025-03-22"
+                                                    },
+                                                    "start_time": {
+                                                        "type": "string",
+                                                        "example": "18:00"
+                                                    },
+                                                    "end_time": {
+                                                        "type": "string",
+                                                        "example": "23:00"
+                                                    },
+                                                    "location": {
+                                                        "type": "string",
+                                                        "example": "Area VIP"
+                                                    },
+                                                    "max_people": {
+                                                        "type": "integer",
+                                                        "example": 120
+                                                    },
+                                                    "visibility": {
+                                                        "type": "string",
+                                                        "example": "publico"
+                                                    },
+                                                    "is_paid": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    },
+                                                    "status": {
+                                                        "type": "string",
+                                                        "example": "ativo"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Evento privado com musica ao vivo e buffet"
+                                                    },
+                                                    "created_by": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
             "post": {
                 "tags": [
                     "Eventos"
@@ -1706,6 +2435,45 @@
                     },
                     "422": {
                         "description": "Dados invalidos"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/events/{id}": {
+            "delete": {
+                "tags": [
+                    "Eventos"
+                ],
+                "summary": "Deletar evento",
+                "operationId": "e6c9d300cb7c22453740cb1ac18eb6e0",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Evento deletado"
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Evento nao encontrado"
                     }
                 },
                 "security": [
@@ -2424,6 +3192,99 @@
                 ]
             }
         },
+        "/api/v1/reservas/{id}": {
+            "delete": {
+                "tags": [
+                    "Reservas"
+                ],
+                "summary": "Cancelar reserva (admin)",
+                "operationId": "a680c9513bffa9579b96296f2d6f8f85",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Reserva cancelada",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Reserva cancelada com sucesso."
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "user_id": {
+                                                    "type": "integer",
+                                                    "example": 5
+                                                },
+                                                "quadra_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "data": {
+                                                    "type": "string",
+                                                    "format": "date",
+                                                    "example": "2025-12-24"
+                                                },
+                                                "hora_inicio": {
+                                                    "type": "string",
+                                                    "example": "10:00"
+                                                },
+                                                "hora_fim": {
+                                                    "type": "string",
+                                                    "example": "11:00"
+                                                },
+                                                "status": {
+                                                    "type": "string",
+                                                    "example": "cancelada"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Nao autenticado"
+                    },
+                    "403": {
+                        "description": "Sem permissao"
+                    },
+                    "404": {
+                        "description": "Reserva nao encontrada"
+                    },
+                    "422": {
+                        "description": "Reserva nao pode ser cancelada"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/admin/reservas/{id}/cancelar": {
             "post": {
                 "tags": [
@@ -2517,13 +3378,13 @@
                 ]
             }
         },
-        "/api/v1/reservas/{id}/cancelar": {
+        "/api/v1/minhas-reservas/{id}/cancelar": {
             "post": {
                 "tags": [
                     "Reservas"
                 ],
-                "summary": "Cancelar reserva",
-                "operationId": "9ac1d994fa36c62497b9091191408236",
+                "summary": "Cancelar minha reserva",
+                "operationId": "114ed0c9485bfdcae23698bf124e2ed1",
                 "parameters": [
                     {
                         "name": "id",
@@ -3002,6 +3863,25 @@
                 }
             }
         },
+        "/api/v1/clients": {
+            "get": {
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Listar clientes",
+                "operationId": "8d8c7c721a9fb1981581d1fa6230e76a",
+                "responses": {
+                    "200": {
+                        "description": "Lista de clientes"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/v1/users/{id}": {
             "put": {
                 "tags": [
@@ -3281,6 +4161,10 @@
         {
             "name": "Reservas Admin",
             "description": "Reservas administrativas"
+        },
+        {
+            "name": "Calendario",
+            "description": "Calendario"
         }
     ]
 }

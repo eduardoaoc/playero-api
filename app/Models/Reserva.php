@@ -37,6 +37,8 @@ class Reserva extends Model
         'hora_inicio',
         'hora_fim',
         'status',
+        'cancelled_at',
+        'cancelled_by',
         'forma_pagamento',
     ];
 
@@ -48,6 +50,8 @@ class Reserva extends Model
             'data' => 'date:Y-m-d',
             'hora_inicio' => TimeCast::class,
             'hora_fim' => TimeCast::class,
+            'cancelled_at' => 'datetime',
+            'cancelled_by' => 'integer',
         ];
     }
 
